@@ -1,0 +1,15 @@
+linkage:
+    - ci [1]<--[1] crs
+    - crs [*]<--[3] srs
+
+
+requirement-schema:
+    # id: string
+    brief: string # short description, informal
+    description: string #description
+    tags: list # any special tags used to categorize later                    
+    analysis:
+        author: string
+        feasibility: string
+        approach to address: string 
+        assumptions: string
