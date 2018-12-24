@@ -1,0 +1,143 @@
++-- init
+
+-- distribution 
+	-- github repo must be created
+	-- installable version 
+		-- setup.py 
+		-- cast console command must be available
+	-- add to pypi
+	-- documentation
+
+-- command interface
+	-- command line reader
+	-- cast verify
+		-- quality gates
+	-- cast cutify
+	-- cast query
+	-- cast update
+	-- cast entropy
+
+
+-- representration
+	-- reserved keywords: must not be used user fileds naming
+		-- feature: means group of requiremnts
+			-- fid: feature id, mandatory
+		-- force: means forced settings for group of requiremnts (oganized hierarchically, lower level forces respect upper level ones)
+		-- requiremnt: requiremnts itself
+			-- origin: mandatory field for requiremnt.
+			-- acceptance: technical status. One of [updated, accepted, rejected]
+			-- rid: requiremnt id, mandatory field 
+
+	-- folder-tree
+		- main representation, full feature set support
+		- folders are feature names
+		- one file = one requiremnt
+		- file names are last level rid
+		- last level rid must be 3 digit number: 001, 002, 999
+		- recommended rule no more than 100 reqs in section allowed
+		- force.yml file contains info about constraints on certain level
+			- must contain linage info
+			- must contain requiremnt schema
+			- must contain default query filters: like query only not rejected
+			- must contain allowed tags list
+		-- embedded objects
+			-- markdown must be supported istead of strings in any text
+			-- single image associated with requirement in png format can be used
+				-- must be named same as file in db
+			-- embedded images must be able to embed to markdown
+				-- path to images must be ralative to corresponding requirement file
+				-- recommended to create folder ./img and store images there
+				-- must support (jpg, svg, png)
+			-- embedded puml diagramms must be supported
+
+
+	-- file-list
+		- does not support force constraints, can be used in update sequece only
+		- filename does not matter
+		- all in one yml file
+		- organized as dict
+		- full feature id must be key
+		- requiremnt contents must be value
+		- sorted in lexi order in file
+
+
+-- crur
+	-- create:
+		-- new id must be assigned
+	-- read
+		-- all representations must be human readable
+		-- query interface must be available to read selected
+	-- update
+		-- must be able to patch one representration to another
+			-- read target repr
+			-- read update repr
+			-- patch target with update
+			-- serialize target back preserving it's structure
+			-- must be cute
+	-- reject
+		-- no delete allowed
+		-- use reject in acceptance status instead
+
+-- reader
+	-- must be able to read all rpresentations
+	-- must remember fs path from folder tree representation 
+
+-- serializer
+	-- must be cute
+	-- folder-tree
+	-- file-list
+	
+-- verify
+	-- read and verify quality gates by level
+	-- quality gates:
+		- document consistent
+			- structure ok (yaml parceable)
+			- structure constraints ok:
+				- all tags are allowed
+				- schema constrains ok (not broken)
+				- links constraints ok
+			- statuses are correct
+				- each scion mus have status, and quality gate same or lower then parents
+			- is cute
+		- traceability established (everybody has origin set)
+		- ready to baseline (TODO: rename)
+			-- all acceptance statuses are accepted or rejected
+
+-- cutify
+	-- just read and write back
+
+-- query: read
+	-- how:
+		-- read
+		-- match (parthe thru tree and generate new tree)
+		-- serialize: depends on serializer, acan be option of command
+		-- output files, lines
+	-- modes:
+		-- to .update folder
+		-- to stdoutput in form parseable by IDE
+
+-- update
+	-- read target repr
+	-- read update repr
+	-- patch target with update
+	-- serialize target back preserving it's structure
+	-- must be cute
+
+-- entropy
+	-- calculate entropy by some formula
+	-- must be in [0, 1]
+	-- the more house we get, the more entropy we have
+
+	-- entropy(requiremnt) = quality_gate * quality_gate_entropy_weight
+	-- entropy(x_rs_document) = sum(entropy(requiremnt) for requiremnt in document) / num_of_reqs(document)
+	-- entropy(project) = sum(entropy(document) for document in project) / num_of_docs(project)
+
+-- import 
+	-- read csv
+	-- generate cute update as a single file
+	-- images must be importable
+
+-- export
+	-- query by some criterion (i.e. to clarify or to approve)
+	-- read cute upodate
+	-- generate csv, or xls
