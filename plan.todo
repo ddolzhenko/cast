@@ -5,6 +5,8 @@
 	-- installable version 
 		-- setup.py 
 		-- cast console command must be available
+	-- git flow
+	-- first release
 	-- add to pypi
 	-- documentation
 
@@ -19,7 +21,7 @@
 
 
 -- representration
-	-- reserved keywords: must not be used user fileds naming
+	+-- reserved keywords: must not be used user fileds naming
 		-- feature: means group of requiremnts
 			-- fid: feature id, mandatory
 		-- force: means forced settings for group of requiremnts (oganized hierarchically, lower level forces respect upper level ones)
@@ -30,9 +32,9 @@
 
 	-- folder-tree
 		- main representation, full feature set support
-		- folders are feature names
-		- one file = one requiremnt
-		- file names are last level rid
+		+- folders are feature names
+		+- one file = one requiremnt
+		+- file names are last level rid
 		- last level rid must be 3 digit number: 001, 002, 999
 		- recommended rule no more than 100 reqs in section allowed
 		- force.yml file contains info about constraints on certain level
@@ -78,7 +80,7 @@
 		-- no delete allowed
 		-- use reject in acceptance status instead
 
--- reader
+----- reader
 	-- must be able to read all rpresentations
 	-- must remember fs path from folder tree representation 
 
