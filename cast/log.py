@@ -1,10 +1,10 @@
 #  @author   Dmitri Dolzhenko
 #  @brief    
 
-import os
+import os, sys
 
 def tab(level):
-    return '    ' * level
+    return '  ' * level
 
 tabulate = lambda x: '    {}'.format(x)
 notab = lambda x: x
@@ -24,7 +24,7 @@ def log_to_file(what):
         _logFile.write(what)
 
 
-verbosity = 1
+verbosity = 100
 tab_level = 0
 
 class levelup:
@@ -49,6 +49,10 @@ def log_level(level, what, data):
 
 def message(data):
     log_level(0, 'message', data)
+
+def critical_error(data):
+    log_level(0, 'CRITICAL_ERROR', data)
+    sys.exit(1)
 
 def error(data):
     log_level(0, 'error', data)

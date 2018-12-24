@@ -12,8 +12,8 @@
             "variants":
             [
                 {
-                    "name": "cast verify trial-project",
-                    "cmd": ["python", "cast-debug.py", "verify", "trial-project"],
+                    "name": "cast judge trial-project",
+                    "cmd": ["python", "cast-debug.py", "judge", "trial-project"],
                 },
 {
                     "name": "cast cutify trial-project",
