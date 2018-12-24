@@ -1,0 +1,78 @@
+{
+    "build_systems":
+    [
+        {
+            "name": "cast no params",
+            "working_dir": "${project_path}",
+            "file_regex": "File \"([^<][^\"]+)\", line (\\d+)\\s*.*",
+            "selector": "source.yaml, source.python, source.json",
+
+            "cmd": ["python", "cast-debug.py", "--help"],
+
+            "variants":
+            [
+                {
+                    "name": "cast verify trial-project",
+                    "cmd": ["python", "cast-debug.py", "verify", "trial-project"],
+                },
+{
+                    "name": "cast cutify trial-project",
+                    "cmd": ["python", "cast-debug.py", "cutify", "trial-project"],
+                },
+
+                {
+                    "name": "cast query trial-project",
+                    "cmd": ["python", "cast-debug.py", "query", "trial-project", "[key in tags]", "trial-project.queries"],
+                },
+                {
+                    "name": "cast update trial-project",
+                    "cmd": ["python", "cast-debug.py", "update", "trial-project.queries/test-query", "trial-project"],
+                },
+
+                {
+                    "name": "install",
+                    "cmd": ["python", "setup.py", "install"],
+                },
+
+                {
+                    "name": "uninstall",
+                    "cmd": ["pip", "uninstall", "cast"],
+                },
+
+                {
+                    "name": "clean",
+                    "cmd": ["python", "setup.py", "clean", "--all"],
+                },
+
+            ]
+        },
+
+
+
+        
+    ],
+    
+    "folders":
+    [
+        {
+            "name": "root",
+            "path": ".",
+            "folder_exclude_patterns": ["build"]
+        }
+    ],
+
+    "settings":
+    {
+        // "font_face": "Menlo",
+        "font_face": "Consolas",
+
+        "auto_indent": true,
+        "smart_indent": true,
+        "spell_check": true,
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "trim_automatic_white_space": true,
+        "word_wrap": "false"
+    }
+    
+}

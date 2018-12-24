@@ -1,21 +1,21 @@
 +-- init
 
 -- distribution 
-	-- github repo must be created
+	+-- github repo must be created
 	-- installable version 
 		-- setup.py 
 		-- cast console command must be available
 	-- add to pypi
 	-- documentation
 
--- command interface
-	-- command line reader
-	-- cast verify
-		-- quality gates
-	-- cast cutify
-	-- cast query
-	-- cast update
-	-- cast entropy
++-- command interface
+	+-- command line reader
+	+-- cast verify
+		+-- quality gates
+	+-- cast cutify
+	+-- cast query
+	+-- cast update
+	+-- cast entropy
 
 
 -- representration
