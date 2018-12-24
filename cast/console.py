@@ -23,13 +23,13 @@ def main():
 
         # cutify
         parser_cutify.add_argument('project', type=str, help='input project to cutify')
-        parser_cutify.add_argument('output', type=str, help='output') # OPTIONAL, default inplace
+        parser_cutify.add_argument('--output', type=str, help='output path.')
         parser_cutify.set_defaults(func=cutify_handler)
 
         # query
         parser_query.add_argument('project', type=str, help='input project')
         parser_query.add_argument('query', type=str, help='query string')
-        parser_query.add_argument('output', type=str, help='output path') # OPTONAL default stdonly
+        parser_query.add_argument('--output', type=str, help='output path')
         parser_query.set_defaults(func=query_handler)
 
         # update
@@ -63,10 +63,21 @@ def judge_handler(args):
         judge.main(db, args.gate)
 
 def cutify_handler(args):
-    pass
+    from cast import chaos
+    with log.levelup():
+        db = chaos.read(args.project)
+        chaos.serialize(db, args.output)
+        
 def query_handler(args):
-    pass
+    from cast import chaos
+    with log.levelup():
+        db = chaos.read(args.project)
+        db = chaos.query(db, args.query)
+        chaos.serialize(db, args.output)
+
 def update_handler(args):
     pass
+
+
 def entropy_handler(args):
     pass
