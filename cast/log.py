@@ -24,7 +24,7 @@ def log_to_file(what):
         _logFile.write(what)
 
 
-verbosity = 100
+verbosity = 11
 tab_level = 0
 
 class levelup:

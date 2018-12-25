@@ -86,9 +86,10 @@
 	+-- must remember fs path from folder tree representation 
 
 ----- serializer
-	-- must be cute
-	-- folder-tree
-	-- file-list
+	+-- must be cute
+	+-- folder-tree
+	+-- file-list
+	-- fix problem with relative pathes
 	
 -- verify
 	-- read and verify quality gates by level

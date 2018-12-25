@@ -29,7 +29,7 @@ def cute_dict(db, level=0):
             yield from cute(req, level+1)
 
 
-def as_file_list_representation(db, out=sys.stdout):
+def as_file_list(db, out=sys.stdout):
  
     def cute(db, level=0):
         if isinstance(db, dict):
@@ -41,8 +41,7 @@ def as_file_list_representation(db, out=sys.stdout):
 
     out.write('\n'.join(cute(db)))
 
-def as_dir_tree_representation(db, output):
-
+def as_dir_tree(db, work_dir):
     structure = {}
     def update(structure, path, data):
         assert len(path) > 0
@@ -57,17 +56,18 @@ def as_dir_tree_representation(db, output):
 
         update(structure[path[0]], path[1:], data)
 
-    with dirutil.work_safe_mkdir(output):
-        for path, req in db.items():
-            update(structure, path.as_fs_path(), '\n'.join(cute_dict(req._db)))
+    for path, req in db.items():
+        update(structure, path.as_fs_path(), '\n'.join(cute_dict(req._db)))
+    
+    with dirutil.work_dir(work_dir):
         dirutil.create_structure(structure)
 
 
-def perform(db, output, forced=False, representation='file-list'):
+def perform(db, work_dir, output, forced=False, representation='file-list'):
     log.debug('chaos.serialize({})'.format(output))
 
     if output is None:
-        return as_file_list_representation(db, sys.stdout)
+        return as_file_list(db, sys.stdout)
     
     if not forced and dirutil.exists(output):
         log.critical_error('path already exists: {}'.format(path))
@@ -76,9 +76,9 @@ def perform(db, output, forced=False, representation='file-list'):
     dirutil.safe_remove(output)
     if representation=='file-list':
         with open(output, 'w') as out:
-            return as_file_list_representation(db, out)
+            return as_file_list(db, out)
     elif representation=='dir-tree':
-        return as_dir_tree_representation(db, output)
+        return as_dir_tree(db, output)
     
     log.critical_error('unknown represention: ' + representation)
 
