@@ -119,31 +119,40 @@ def serialize(db, output, forced=False):
 
 
     tab = '  '
-    def cute_str(text, level):
-        if '\n' in text:
-            yield '|\n'
-        for line in text.split('\n'):
-            yield (tab*level) + line
 
+    is_str = lambda x: isinstance(x, str)
+    is_oneline_str = lambda x: is_str(x) and ('\n' not in x)
+    is_multiline_str = lambda x: is_str(x) and ('\n' in x)
+    is_leaf = lambda x: (type(x) in {int}) or is_oneline_str(x)
+
+    def cute_str(text, level):
+        prefix = tab*level
+        yield '|'
+        for line in text.split('\n'):
+            yield prefix + line
+        yield ''
+        
     def cute_dict(db, level):
+        prefix = tab*level
         for k, req in db.items():
-            yield '{}{}:'.format(tab*level, k)
-            yield from cute(req, level+1)
+            if is_leaf(req):
+                yield '{}{}: {}'.format(prefix, k, str(req))
+            elif is_multiline_str(req):
+                yield '{}{}:'.format(prefix, k)
+                yield from cute_str(req, level+1)
+            else:
+                yield '{}{}:'.format(prefix, k)
+                yield from cute(req, level+1)
 
     def cute(db, level=0):
-        if isinstance(db, str):
-            yield from cute_str(db, level+1)
-        elif isinstance(db, int):
-            yield str(db)
-        elif isinstance(db, dict):
-            cute_dict(db, level)
+        if isinstance(db, dict):
+            yield from cute_dict(db, level)
         elif isinstance(db, Requirement):
-            cute_dict(db._db, level)
+            yield from cute_dict(db._db, level)
         else:
-            log.critical_error('unknown type in db: ' + str(type(db)))
+            log.critical_error('unknown type in db: ' + str(type(db)) +str(db))
 
-
+    # print('output = "{}"'.format(output))
     output = dirutil.abspath(output)
     dirutil.safe_remove(output)
-    print(dirutil.cwd())
-    dirutil.file_write(output, ''.join(cute(db)))
+    dirutil.file_write(output, '\n'.join(cute(db)))

@@ -24,6 +24,7 @@ def main():
         # cutify
         parser_cutify.add_argument('project', type=str, help='input project to cutify')
         parser_cutify.add_argument('--output', type=str, help='output path.')
+        parser_cutify.add_argument('--forced', action='store_true', help='forced overwrite.')
         parser_cutify.set_defaults(func=cutify_handler)
 
         # query
@@ -66,7 +67,7 @@ def cutify_handler(args):
     from cast import chaos
     with log.levelup():
         db = chaos.read(args.project)
-        chaos.serialize(db, args.output)
+        chaos.serialize(db, args.output, forced=args.forced)
         
 def query_handler(args):
     from cast import chaos
