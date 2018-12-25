@@ -89,7 +89,8 @@
 	+-- must be cute
 	+-- folder-tree
 	+-- file-list
-	-- fix problem with relative pathes
+	+-- fix problem with relative pathes
+	+-- fix problem with forced constraints
 	
 -- verify
 	-- read and verify quality gates by level

@@ -48,6 +48,9 @@ class Requirement:
         self._db = db
         self._force = force
 
+    def as_dict(self):
+        return self._db
+
 class Force:
     @staticmethod
     def from_file(filename):
@@ -59,7 +62,12 @@ class Force:
         self._restrictions = force
 
     def restricted_with(self, other):
-        pass # TODO
+        # TODO
+        return Force(other._restrictions.copy())
+        
+
+    def as_dict(self):
+        return self._restrictions
 
 def update_restrictions(force):
     forcefile = 'force.yml'
@@ -81,7 +89,9 @@ def read_dir_tree_representation(path):
             if spec.endswith(specext) and spec not in keyfiles:
                 log.debug('+adding spec: {} from: {}'.format(spec, path))
                 yield path.extended_file(spec), Requirement.from_file(spec, force)
-            else:
+            elif spec == 'force.yml':
+                yield path.extended_file(spec), force
+            else: 
                 log.debug('-skipping: {} from: {}'.format(spec, path))
         elif dirutil.isdir(spec):
             dirpath = dirutil.abspath(spec)
