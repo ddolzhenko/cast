@@ -1,4 +1,4 @@
-import os
+import os, sys
 import yaml, dirutil
 from cast import log
 
@@ -9,6 +9,10 @@ keyfiles = {word+specext for word in keywords}
 class Path:
     def __init__(self, path=[]):
         self._path = path
+
+    def as_fs_path(self):
+        extract = lambda what, data: data+specext if what == 'file' else data
+        return [extract(*x.split(':')) for x in self._path]
 
     def extended_file(self, x):
         result = Path(self._path.copy())
@@ -104,55 +108,3 @@ def read(path):
         else:
             log.critical_error('unknown chaos representation: {}'.format(path))
 
-
-
-def serialize(db, output, forced=False):
-    log.debug('chaos.serialize({})'.format(output))
-
-    if output is None:
-        for k, v in db.items():
-            log.message('{}: {}'.format(k, v))
-            return
-
-    if not forced and dirutil.exists(output):
-        log.critical_error('path already exists: {}'.format(path))
-
-
-    tab = '  '
-
-    is_str = lambda x: isinstance(x, str)
-    is_oneline_str = lambda x: is_str(x) and ('\n' not in x)
-    is_multiline_str = lambda x: is_str(x) and ('\n' in x)
-    is_leaf = lambda x: (type(x) in {int}) or is_oneline_str(x)
-
-    def cute_str(text, level):
-        prefix = tab*level
-        yield '|'
-        for line in text.split('\n'):
-            yield prefix + line
-        yield ''
-        
-    def cute_dict(db, level):
-        prefix = tab*level
-        for k, req in db.items():
-            if is_leaf(req):
-                yield '{}{}: {}'.format(prefix, k, str(req))
-            elif is_multiline_str(req):
-                yield '{}{}:'.format(prefix, k)
-                yield from cute_str(req, level+1)
-            else:
-                yield '{}{}:'.format(prefix, k)
-                yield from cute(req, level+1)
-
-    def cute(db, level=0):
-        if isinstance(db, dict):
-            yield from cute_dict(db, level)
-        elif isinstance(db, Requirement):
-            yield from cute_dict(db._db, level)
-        else:
-            log.critical_error('unknown type in db: ' + str(type(db)) +str(db))
-
-    # print('output = "{}"'.format(output))
-    output = dirutil.abspath(output)
-    dirutil.safe_remove(output)
-    dirutil.file_write(output, '\n'.join(cute(db)))

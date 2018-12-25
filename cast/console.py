@@ -64,17 +64,17 @@ def judge_handler(args):
         judge.main(db, args.gate)
 
 def cutify_handler(args):
-    from cast import chaos
+    from cast import chaos, serialize
     with log.levelup():
         db = chaos.read(args.project)
-        chaos.serialize(db, args.output, forced=args.forced)
+        serialize.perform(db, args.output, forced=args.forced, representation='dir-tree')
         
 def query_handler(args):
-    from cast import chaos
+    from cast import chaos, serialize
     with log.levelup():
         db = chaos.read(args.project)
         db = chaos.query(db, args.query)
-        chaos.serialize(db, args.output)
+        serialize.perform(db, args.output)
 
 def update_handler(args):
     pass
