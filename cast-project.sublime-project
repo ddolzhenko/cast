@@ -15,9 +15,9 @@
                     "name": "cast judge trial-project",
                     "cmd": ["python", "cast-debug.py", "judge", "trial-project"],
                 },
-{
+                {
                     "name": "cast cutify trial-project",
-                    "cmd": ["python", "cast-debug.py", "cutify", "trial-project"],
+                    "cmd": ["python", "cast-debug.py", "cutify", "trial-project", "--output", "trial-project.tests/out.yml"],
                 },
 
                 {

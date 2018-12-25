@@ -81,10 +81,11 @@
 		-- use reject in acceptance status instead
 
 ----- reader
-	-- must be able to read all rpresentations
-	-- must remember fs path from folder tree representation 
+	+-- must be able to read dir repr
+	-- must be able to read filelist repr
+	+-- must remember fs path from folder tree representation 
 
--- serializer
+----- serializer
 	-- must be cute
 	-- folder-tree
 	-- file-list
@@ -118,7 +119,7 @@
 		-- to .update folder
 		-- to stdoutput in form parseable by IDE
 
--- update
+----- update
 	-- read target repr
 	-- read update repr
 	-- patch target with update
@@ -134,7 +135,7 @@
 	-- entropy(x_rs_document) = sum(entropy(requiremnt) for requiremnt in document) / num_of_reqs(document)
 	-- entropy(project) = sum(entropy(document) for document in project) / num_of_docs(project)
 
--- import 
+----- import 
 	-- read csv
 	-- generate cute update as a single file
 	-- images must be importable

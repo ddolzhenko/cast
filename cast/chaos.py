@@ -111,9 +111,39 @@ def serialize(db, output, forced=False):
 
     if output is None:
         for k, v in db.items():
-            # log.message('{}: {}'.format(k, v))
-            print('{}: {}'.format(k, v))
-        return
+            log.message('{}: {}'.format(k, v))
+            return
 
     if not forced and dirutil.exists(output):
         log.critical_error('path already exists: {}'.format(path))
+
+
+    tab = '  '
+    def cute_str(text, level):
+        if '\n' in text:
+            yield '|\n'
+        for line in text.split('\n'):
+            yield (tab*level) + line
+
+    def cute_dict(db, level):
+        for k, req in db.items():
+            yield '{}{}:'.format(tab*level, k)
+            yield from cute(req, level+1)
+
+    def cute(db, level=0):
+        if isinstance(db, str):
+            yield from cute_str(db, level+1)
+        elif isinstance(db, int):
+            yield str(db)
+        elif isinstance(db, dict):
+            cute_dict(db, level)
+        elif isinstance(db, Requirement):
+            cute_dict(db._db, level)
+        else:
+            log.critical_error('unknown type in db: ' + str(type(db)))
+
+
+    output = dirutil.abspath(output)
+    dirutil.safe_remove(output)
+    print(dirutil.cwd())
+    dirutil.file_write(output, ''.join(cute(db)))
