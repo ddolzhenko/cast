@@ -66,7 +66,7 @@ def cutify_handler(args):
     with log.levelup():
         db = chaos.read(args.project)
         work_dir = args.project+'/..'
-        work_dir = 'trial-project.tests'
+        # work_dir = 'trial-project.tests'
         serialize.as_dir_tree(db, work_dir)
         
 def query_handler(args):

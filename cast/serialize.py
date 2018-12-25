@@ -60,6 +60,8 @@ def as_dir_tree(db, work_dir):
         update(structure, path.as_fs_path(), '\n'.join(cute_dict(req._db)))
     
     with dirutil.work_dir(work_dir):
+        for k in structure.keys():
+            dirutil.safe_remove(k)
         dirutil.create_structure(structure)
 
 
