@@ -2,7 +2,7 @@
 
 -- distribution 
 	+-- github repo must be created
-	-- installable version 
+	--- installable version 
 		-- setup.py 
 		-- cast console command must be available
 	-- git flow

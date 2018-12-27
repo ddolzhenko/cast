@@ -10,7 +10,7 @@ def main():
         parser = argparse.ArgumentParser(prog='cast', description='Order in Chaos')
         parser.add_argument('--verbose', '-v', action='count')
         subparsers = parser.add_subparsers()
-        parser_judge   = subparsers.add_parser('judge',   help='evaluates project')
+        parser_judge    = subparsers.add_parser('judge',   help='evaluates project')
         parser_cutify   = subparsers.add_parser('cutify',   help='cutifies project')
         parser_query    = subparsers.add_parser('query',    help='similar to xpath queries')
         parser_update   = subparsers.add_parser('update',   help='update chaos database')
@@ -32,8 +32,8 @@ def main():
         parser_query.set_defaults(func=query_handler)
 
         # update
-        parser_update.add_argument('patch', type=str, help='input project')
-        parser_update.add_argument('project', type=str, help='query string')
+        parser_update.add_argument('project', type=str, help='project to update')
+        parser_update.add_argument('patch', type=str, help='patch to aaply')
         parser_update.add_argument('--preview', action='store_true', help='only preview impact')
         parser_update.set_defaults(func=update_handler)
 
@@ -74,10 +74,18 @@ def query_handler(args):
     with log.levelup():
         db = chaos.read(args.project)
         db = chaos.query(db, args.query)
-        serialize.perform(db, args.output)
+        serialize.as_file_list_tree(db, args.output)
 
 def update_handler(args):
-    pass
+    from cast import chaos, serialize
+    
+    with log.levelup():
+        db = chaos.read(args.project)
+        patch = chaos.read(args.patch)
+        new_db = chaos.update(db, pacth)
+        if not args.preview:
+            work_dir = args.project+'/..'
+            serialize.as_dir_tree(db, args.work_dir)
 
 
 def entropy_handler(args):

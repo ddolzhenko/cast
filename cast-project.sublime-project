@@ -28,6 +28,10 @@
                     "name": "cast update trial-project",
                     "cmd": ["python", "cast-debug.py", "update", "trial-project.queries/test-query", "trial-project"],
                 },
+                {
+                    "name": "cast update trial-project --preview",
+                    "cmd": ["python", "cast-debug.py", "update", "trial-project.queries/test-query", "trial-project", "--preview"],
+                },
 
                 {
                     "name": "install",
