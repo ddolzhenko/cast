@@ -19,7 +19,6 @@
                     "name": "cast cutify trial-project",
                     "cmd": ["python", "cast-debug.py", "cutify", "trial-project"],
                 },
-
                 {
                     "name": "cast query trial-project",
                     "cmd": ["python", "cast-debug.py", "query", "trial-project", "[key in tags]", "trial-project.queries"],
@@ -31,6 +30,10 @@
                 {
                     "name": "cast update trial-project --preview",
                     "cmd": ["python", "cast-debug.py", "update", "trial-project.queries/test-query", "trial-project", "--preview"],
+                },
+                {
+                    "name": "cast import trial-project trial-imports/test1.csv trial-updates/import1.yml",
+                    "cmd": ["python", "cast-debug.py", "import", "trial-project", "trial-imports/test1.csv", "trial-updates/import1.yml"],
                 },
 
                 {

@@ -56,6 +56,7 @@ class Requirement:
     def _patch_required_fields(self):
         self._db['origin'] = self._db.get('origin', '')
         self._db['text'] = self._db.get('text', '')
+        self._db['tags'] = self._db.get('text', [])
 
 class Force:
     @staticmethod

@@ -10,11 +10,12 @@ def main():
         parser = argparse.ArgumentParser(prog='cast', description='Order in Chaos')
         parser.add_argument('--verbose', '-v', action='count')
         subparsers = parser.add_subparsers()
-        parser_judge    = subparsers.add_parser('judge',   help='evaluates project')
+        parser_judge    = subparsers.add_parser('judge',    help='evaluates project')
         parser_cutify   = subparsers.add_parser('cutify',   help='cutifies project')
         parser_query    = subparsers.add_parser('query',    help='similar to xpath queries')
         parser_update   = subparsers.add_parser('update',   help='update chaos database')
         parser_entropy  = subparsers.add_parser('entropy',  help='estimate entropy')
+        parser_import   = subparsers.add_parser('import',   help='import various formats')
 
         # judge    
         parser_judge.add_argument('project', type=str, help='project path')
@@ -42,6 +43,12 @@ def main():
         parser_entropy.set_defaults(func=entropy_handler)
 
         # import
+        parser_import.add_argument('project', type=str, help='project')
+        parser_import.add_argument('input', type=str, help='input file')
+        parser_import.add_argument('delta', type=str, help='path to delta file')
+        parser_import.set_defaults(func=import_handler)
+
+        # import
 
         # parse some argument lists
         args = parser.parse_args()
@@ -61,6 +68,7 @@ def judge_handler(args):
         db = chaos.read(args.project)
         judge.main(db, args.gate)
 
+
 def cutify_handler(args):
     from cast import chaos, serialize
     with log.levelup():
@@ -69,12 +77,14 @@ def cutify_handler(args):
         # work_dir = 'trial-project.tests'
         serialize.as_dir_tree(db, work_dir)
         
+
 def query_handler(args):
     from cast import chaos, serialize
     with log.levelup():
         db = chaos.read(args.project)
         db = chaos.query(db, args.query)
         serialize.as_file_list_tree(db, args.output)
+
 
 def update_handler(args):
     from cast import chaos, serialize
@@ -90,3 +100,14 @@ def update_handler(args):
 
 def entropy_handler(args):
     pass
+
+
+def import_handler(args):
+    from cast import chaos, serialize, importer
+    with log.levelup():
+        db = chaos.read(args.project)
+        if args.input.endswith('.csv'):
+            patch = importer.csv(db, args.input)
+
+        with open(args.delta, 'w') as f:
+            serialize.as_file_list(patch, f)
