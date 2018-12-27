@@ -45,11 +45,17 @@ class Requirement:
             return Requirement(db, force)
 
     def __init__(self, db, force):
-        self._db = db
+        self._db = db.copy()
         self._force = force
+        self._patch_required_fields()
 
-    def as_dict(self):
+    @property
+    def db(self):
         return self._db
+
+    def _patch_required_fields(self):
+        self._db['origin'] = self._db.get('origin', '')
+        self._db['text'] = self._db.get('text', '')
 
 class Force:
     @staticmethod
@@ -68,6 +74,28 @@ class Force:
 
     def as_dict(self):
         return self._restrictions
+
+class DB:
+    def __init_(self, db):
+        self._db = db
+        self._origin_index = self._generate_origin_index()
+        self._text_index = self._generate_text_index()
+        self._origin_index  = {hash(r.db['origin']): req for rid, req in self._db.items()}
+        self._text_index    = {hash(r.db['text']): req for rid, req in self._db.items()}
+
+    @property
+    def db(self):
+        return self._db
+
+    @property
+    def origin_hash_index(self):
+        return self._origin_index
+    
+    @property
+    def text_hash_index(self):
+        return self._text_index
+     
+
 
 def update_restrictions(force):
     forcefile = 'force.yml'
@@ -118,3 +146,28 @@ def read(path):
         else:
             log.critical_error('unknown chaos representation: {}'.format(path))
 
+
+def update(db, patch):
+    added = 0
+    changed = 0
+
+
+    def try_update_req(what, patch):
+        if patch is None:
+            return what
+        if not isinstance(what, dict) or not isinstance(patch, dict):
+            return patch
+        keys = set(what.keys()) | set(patch.keys())
+        return {k:try_update_req(what.get(k), patch.get(k)) for k in keys}
+
+    old_db = db.copy()
+    for rid, req in patch.items():
+        if rid not in old_db:
+            print ('update-added:{}:::'.format(rid))
+            db[rid] = req
+            added += 1
+        else:
+            db[rid] = try_uodate_req(db[rid], req.db)
+
+
+    return db
