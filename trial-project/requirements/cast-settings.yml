@@ -1,0 +1,48 @@
+schemas:
+    $define:
+        $link:  type=string;
+        $text:  type=string;
+        $tag:   type=string; values=[data, hmi, hw, sw];
+        $tags:  type=list<$tag>;
+        $name:  type=string;
+        $mail:  type=string; mask=".+@.+"
+
+                
+    requirement:
+        origin:         $link
+        german-text:    $text
+        text:           $text
+        tags:           $tags
+        analysis:
+            author-mail:            $mail
+            feasibility-study:      $text
+            approach-to-address:    $text
+            assumptions:            $text
+        status:
+            input:          type=string; values=[new, updated, confirmed, rejected]
+            translation:    type=string; values=[untranslated, translated]
+
+linkage:
+    - rat.rid [*] <- [*] prs.origin
+
+gates:
+    0:  name: valid
+        test: 
+            - verify_file_structure
+            - verify_syntax
+    1:  name: detalized
+        test:
+            - verify_requirement_schema
+    2:  name: cute
+        test:
+            - verify_cuteness
+    3:  name: traceable
+        test:
+            - verify_link_direction
+            - verify_link_relations
+    4:  name: consistent
+        test:
+            - verify_derived_statuses
+    5:  name: ready
+        test:
+            - verify_acceptance_statuses

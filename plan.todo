@@ -92,20 +92,25 @@
 	+-- fix problem with relative pathes
 	+-- fix problem with forced constraints
 	
--- verify
+-- judge
 	-- read and verify quality gates by level
 	-- quality gates:
-		- document consistent
-			- structure ok (yaml parceable)
-			- structure constraints ok:
+		- valid
+			- file structure ok
+			- syntax ok
+		- detalized
+			- requirement schema ok
+				- all types are valid
 				- all tags are allowed
-				- schema constrains ok (not broken)
-				- links constraints ok
-			- statuses are correct
-				- each scion mus have status, and quality gate same or lower then parents
-			- is cute
-		- traceability established (everybody has origin set)
-		- ready to baseline (TODO: rename)
+				- all origins are set
+		- cute
+			- order sorted according to cute rules (hash(cute(req)) == hash(req))
+		- traceable
+			- link direction ok
+			- link limits ok
+		- consistent
+			- each scion must have derived status = status
+		- ready to baseline
 			-- all acceptance statuses are accepted or rejected
 
 -- cutify

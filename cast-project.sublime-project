@@ -2,7 +2,7 @@
     "build_systems":
     [
         {
-            "name": "cast no params",
+            "name": "cast",
             "working_dir": "${project_path}",
             "file_regex": "File \"([^<][^\"]+)\", line (\\d+)\\s*.*",
             "selector": "source.yaml, source.python, source.json",
