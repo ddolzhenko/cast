@@ -1,81 +1,129 @@
-import os, sys
+import os, sys, re
 import yaml, dirutil
 from cast import log
 
-specext = '.yml'
-keywords = set(['feature', 'fid', 'force', 'requirement', 'origin', 'acceptance', 'rid'])
-keyfiles = {word+specext for word in keywords}
+featureext = '.yml'
+settingsfile = 'cast-settings' + featureext
+keyfiles = {settingsfile}
 
+class Status:
+    def __init__(self):
+        self._file_structure_errors = []
+
+    def fs_object_not_found(self, path, name):
+        self._file_structure_errors.append('"{}" not found in: {}'.format(path, name))
+
+
+def read_yaml(filename, status):
+    try:
+        with open(filename, 'r') as f:
+            return = yaml.load(f)
+    except SomeFileError as e:
+        log.debug('exception captured: {}'.format(e))
+        status
+    except SomeYamlError as e:
+        status
+    return dict()
+        
 class Path:
     def __init__(self, path=[]):
         self._path = path
+
+    def copy(self):
+        return Path(self._path.copy())
 
     def as_fs_path(self):
         extract = lambda what, data: data+specext if what == 'file' else data
         return [extract(*x.split(':')) for x in self._path]
 
-    def extended_file(self, x):
-        result = Path(self._path.copy())
-        assert x.endswith(specext)
-        x = x[:-len(specext)]
-        result._path.append('file:' + x)
-        return result
+    def join_file(self, x):
+        return Path(self._path + [('file:'+os.path.splitext(x)[0])])
 
-    def extended_dir(self, x):
-        result = Path(self._path.copy())
-        result._path.append('dir:' + x)
-        return result
-
-    def extended_feature(self, x):
-        result = Path(self._path.copy())
-        result._path.append('feature:' + x)
-        return result
-
+    def join_dir(self, x):
+        return Path(self._path + [('dir:'+x)])
+        
+    def join_feature(self, x):
+        return Path(self._path + [('feature:'+x)])
+        
     def __str__(self):
-        return '/'.join((x.split(':')[-1] for x in self._path))
+        return '/'.join(self.as_fs_path())
 
     def __hash__(self):
         return hash(str(self))
 
 class Requirement:
     @staticmethod
-    def from_file(filename, force):
-        with open(filename, 'r') as f:
-            db = yaml.load(f)
-            return Requirement(db, force)
-
-    def __init__(self, db, force):
-        self._db = db.copy()
-        self._force = force
-        self._patch_required_fields()
-
+    def from_file(filename, status):
+        return Requirement(read_yaml(filename status))
+        
+    def __init__(self, db):
+        self._db = db
+        
     @property
     def db(self):
         return self._db
 
-    def _patch_required_fields(self):
-        self._db['origin'] = self._db.get('origin', '')
-        self._db['text'] = self._db.get('text', '')
-        self._db['tags'] = self._db.get('text', [])
+class Feature:
+    def __init__(self, db, settings):
+        self._db = dict()
+        self._settings = settings
+        for k, v in db.items:
+            if isinstance(v, Settings):
+                self._settings = v
+            else:
+                self._db[k] = v
 
-class Force:
-    @staticmethod
-    def from_file(filename):
-        with open(filename) as f:
-            db = yaml.load(f)
-            return Force(db)
+class Schemas:
+    def __init__(self, base, status):
+        pass
 
-    def __init__(self, force=dict()):
-        self._restrictions = force
+class LinkRestriction:
+    def __init__(self, parent, scion, relation):
+        assert isinstance(relation, tuple)
+        self._parent = parent.strip()
+        self._scion = scion.strip()
+        self._relation = relation
 
-    def restricted_with(self, other):
-        # TODO
-        return Force(other._restrictions.copy())
+    def __str__(self):
+        return '{}<-{}'.format(self._parent, self.scion)
+
+    def __hash__(self):
+        return hash(str(self))
+
+class Linkage:
+    def __init__(self, db, base, status):
+
+        self._limits = base._limits.copy()
+
+        for line in db:
+            try:
+                l, r = line.strip().split('<-')
+                l, ln = re.split(r'\s', l.strip())
+                rn, r = re.split(r'\s', r.strip())
+                restr = LinkRestriction(l, r, (ln.strip('[]'), rn.strip('[]')))
+                if restr in self._limits:
+                    status.wrong_setting('{} already defined'.format(line))
+                else:
+                    log.debug('adding new link restriction: {}, {}'.format(restr, restr._relation))
+                    self._limits.add(restr)
+            except:
+                status.wrong_syntax('"{}"; expected: <parent>.<id_field> [<number>] <- [<number>] <scion>.<origin_field>'.format(line))
+
+    
+class Gates:
+    def __init__(self, base, status):
         
 
-    def as_dict(self):
-        return self._restrictions
-
+class Settings:
+    @staticmethod
+    def from_file(filename, base, status):
+        return  Settings(read_yaml(filename, status), base, status=status)
+            
+    def __init__(self, db, status):
+        self.schemas = Schemas(db.get('schemas', dict()), base.schemas, status)
+        self.linkage = Linkage(db.get('linkage', dict()), base.linkage, status)
+        self.gates =   Gates(db.get('gates', dict()), base.gates, status)
+    
 class DB:
     def __init_(self, db):
         self._db = db
@@ -96,57 +144,42 @@ class DB:
     def text_hash_index(self):
         return self._text_index
      
+class Settings:
+    def __init__(self):
+        pass
 
 
-def update_restrictions(force):
-    forcefile = 'force.yml'
-    if dirutil.exists(forcefile):
-        update = Force.from_file(forcefile)
-        return force.restricted_with(update)
-    return force
 
-def read_file_list_representation(path):
-    log.debug('chaos.read_file_list_representation({})'.format(path))
-
-def read_dir_tree_representation(path):
+def read_dir_tree(featurepath, status):
     log.debug('chaos.read_dir_tree_representation({})'.format(path))
 
-    def spec_iterator(spec, path=Path(), force=Force()):
-        if not dirutil.exists(spec):
-            log.critical_error('object not found. path={}, object={}'.format(path, spec))
-        elif dirutil.isfile(spec):
-            if spec.endswith(specext) and spec not in keyfiles:
-                log.debug('+adding spec: {} from: {}'.format(spec, path))
-                yield path.extended_file(spec), Requirement.from_file(spec, force)
-            elif spec == 'force.yml':
-                yield path.extended_file(spec), force
-            else: 
-                log.debug('-skipping: {} from: {}'.format(spec, path))
-        elif dirutil.isdir(spec):
-            dirpath = dirutil.abspath(spec)
-            log.debug('reading feature: {} from: {}'.format(spec, path))
-            with dirutil.work_dir(dirpath), log.levelup():
-                force = update_restrictions(force)
-                for fsitem in os.listdir(dirpath):
-                    yield from spec_iterator(fsitem, path.extended_dir(spec), force)
-        else:
-            critical_error('strange object {} detected in: {}'.format(spec, path))
+    def read_feature(feature, path, settings, status):
+        if not dirutil.exists(feature):
+            status.fs_object_not_found(path, feature) 
+        elif dirutil.isfile(feature):
+            path = path.join_file(feature)
+            if settingsfile == feature:
+                return path, Settings.from_file(feature, derive=settings, status=status)
+            elif feature.endswith(featureext):
+                return path, Requirement.from_file(feature, status=status)
+        elif dirutil.isdir(feature):
+            path = path.join_dir(feature)
+            with dirutil.work_dir(dirutil.abspath(feature)), log.levelup():
+                return Feature({read_feature(f, path, settings, status) for f in os.listdir()}, settings)
+
+    return read_feature(featurepath, path=Path(), settings=Settings(), status=Status())
     
-    with log.levelup(): 
-        result = {rid : req for rid, req in spec_iterator(path)}
-    return result
 
 def read(path):
     log.debug('chaos.read({})'.format(path))
 
     with log.levelup():
         if dirutil.isfile(path):
-            return read_file_list_representation(path)
+            return read_file_list(path)
         elif dirutil.isdir(path):
-            return read_dir_tree_representation(path)
+            return read_dir_tree(path)
         else:
             log.critical_error('unknown chaos representation: {}'.format(path))
-
 
 def update(db, patch):
     added = 0
