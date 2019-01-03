@@ -6,6 +6,22 @@ featureext = '.yml'
 settingsfile = 'cast-settings' + featureext
 keyfiles = {settingsfile}
 
+def read_yaml(filename, status):
+    try:
+        with open(filename, 'r') as f:
+            return = yaml.load(f)
+    except SomeFileError as e:
+        status.file_error(e)
+    except SomeYamlError as e:
+        status.yaml_error(e)
+    return dict()
+
+def verification_procedures():
+    from inspect import getmembers, isfunction
+    from cast import verification
+    vps = {x[0]:x[1] for x in getmembers(verification) if isfunction(x[1]) and x[0].startswith('verify_')}
+    return vps
+
 class Status:
     def __init__(self):
         self._file_structure_errors = []
@@ -14,16 +30,6 @@ class Status:
         self._file_structure_errors.append('"{}" not found in: {}'.format(path, name))
 
 
-def read_yaml(filename, status):
-    try:
-        with open(filename, 'r') as f:
-            return = yaml.load(f)
-    except SomeFileError as e:
-        log.debug('exception captured: {}'.format(e))
-        status
-    except SomeYamlError as e:
-        status
-    return dict()
         
 class Path:
     def __init__(self, path=[]):
@@ -74,7 +80,7 @@ class Feature:
                 self._db[k] = v
 
 class Schemas:
-    def __init__(self, base, status):
+    def __init__(self, db, base, status):
         pass
 
 class LinkRestriction:
@@ -92,8 +98,11 @@ class LinkRestriction:
 
 class Linkage:
     def __init__(self, db, base, status):
-
         self._limits = base._limits.copy()
+
+        if not isinstance(db, list):
+            status.wrong_structure('list expected in linkage')
+            return
 
         for line in db:
             try:
@@ -108,11 +117,30 @@ class Linkage:
                     self._limits.add(restr)
             except:
                 status.wrong_syntax('"{}"; expected: <parent>.<id_field> [<number>] <- [<number>] <scion>.<origin_field>'.format(line))
-
     
 class Gates:
-    def __init__(self, base, status):
-        
+    def __init__(self, db, base, status):
+        if not isinstance(db, dict):
+            status.wrong_structure('dict expected in gates')
+
+        if len(db) == 0:
+            self._db = base
+            return
+
+        self._db = base._db.copy()
+        for k, v in db.items():
+            if k in self._db:
+                status.wrong_structure('gate "{}" already defined'.format(k))
+            else:
+                try:
+                    data = {'name':v['name'], 'tests':v['tests']}
+                    for test in data['tests']:
+                        if test not in verification_procedures()
+                            status.wrong_structure('gate "{}". Unknown procedure: {}'.format(k, test))
+                    self._db[k] = data
+                except:
+                    status.wrong_structure('gate "{}" has incorrect one'.format(k))
+
 
 class Settings:
     @staticmethod
@@ -121,9 +149,10 @@ class Settings:
             
     def __init__(self, db, status):
         self.schemas = Schemas(db.get('schemas', dict()), base.schemas, status)
-        self.linkage = Linkage(db.get('linkage', dict()), base.linkage, status)
+        self.linkage = Linkage(db.get('linkage', list()), base.linkage, status)
         self.gates =   Gates(db.get('gates', dict()), base.gates, status)
     
+
 class DB:
     def __init_(self, db):
         self._db = db
