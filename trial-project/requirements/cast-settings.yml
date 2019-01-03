@@ -2,17 +2,20 @@ schemas:
     $define:
         $link:  type=string;
         $text:  type=string;
-        $tag:   type=string; values=[data, hmi, hw, sw];
-        $tags:  type=list<$tag>;
+        
         $name:  type=string;
         $mail:  type=string; mask=".+@.+"
 
+        $rat_tag:   type=string; values=[data, hmi, hw, sw];
+        $rat_tags:  type=list<$rat_tag>;
+        
+        $srs_tag:   type=string; values=[some_stuff_from_srs];
+        $srs_tags:  type=list<$rat_tag>;
+        
                 
     requirement:
         origin:         $link
-        german-text:    $text
         text:           $text
-        tags:           $tags
         analysis:
             author-mail:            $mail
             feasibility-study:      $text
@@ -20,7 +23,6 @@ schemas:
             assumptions:            $text
         status:
             input:          type=string; values=[new, updated, confirmed, rejected]
-            translation:    type=string; values=[untranslated, translated]
 
 linkage:
     - rat.rid [*] <- [*] prs.origin
