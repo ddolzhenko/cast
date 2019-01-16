@@ -79,9 +79,50 @@ class Feature:
             else:
                 self._db[k] = v
 
+
+
+
+class AstDict:
+    def __init__(self, db):
+
+
+
+
 class Schemas:
+
     def __init__(self, db, base, status):
-        pass
+
+        types_table = {}
+        types_queue = db.get('$typedefs', dict())
+
+
+        def walk_commands(line):
+            for cmd in line.split(';'):
+                data = cmd.split('=')
+                if len(data) != 2:
+                    status.wrong_syntax(cmd)
+                else:
+                    yield data[0].strip(), data[1].strip()
+
+        def get_node(db):
+            if isinstance(db, str):
+                commands = {c:params for c,params in walk_commands(db)}
+                if 'type' in commands:
+                    t = commands['type']
+                    if isinstance()
+        
+        def extract_type(key):
+            db = types_queue[key]
+            del types_queue[key]
+            if key in types_table:
+                status.wrong_structure('type "{}" already been defined'.format(key))
+            else:
+                types_table[key] = AstNode(db, extract_type)
+                    
+        while len(types_queue) > 0:
+            key = types_queue.keys()[0]
+            types_table[key] = extract_type(key)
+
 
 class LinkRestriction:
     def __init__(self, parent, scion, relation):
@@ -147,10 +188,10 @@ class Settings:
     def from_file(filename, base, status):
         return  Settings(read_yaml(filename, status), base, status=status)
             
-    def __init__(self, db, status):
-        self.schemas = Schemas(db.get('schemas', dict()), base.schemas, status)
-        self.linkage = Linkage(db.get('linkage', list()), base.linkage, status)
-        self.gates =   Gates(db.get('gates', dict()), base.gates, status)
+    def __init__(self, db, base, status):
+        self.schemas = Schemas(db.get('schemas'), base.schemas, status)
+        self.linkage = Linkage(db.get('linkage'), base.linkage, status)
+        self.gates =   Gates(db.get('gates'), base.gates, status)
     
 
 class DB:

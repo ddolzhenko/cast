@@ -1,33 +1,36 @@
 schemas:
-    $define:
+    $typedef:
         $link:  type=string;
         $text:  type=string;
         
         $name:  type=string;
-        $mail:  type=string; mask=".+@.+"
+        $mail:  type=string; mask=".+@.+";
 
-        $rat_tag:   type=string; values=[data, hmi, hw, sw];
+        $rat_tag:   type=string; enum=[data, hmi, hw, sw];
         $rat_tags:  type=list<$rat_tag>;
         
-        $srs_tag:   type=string; values=[some_stuff_from_srs];
+        $srs_tag:   type=string; enum=[some_stuff_from_srs];
         $srs_tags:  type=list<$rat_tag>;
         
+        $input_status:  type=string; enum=[new, updated, confirmed, rejected];
+
                 
-    requirement:
-        origin:         $link
-        text:           $text
-        analysis:
+    requirement: 
+        origin:                     $link
+        text:                       $text
+        analysis: 
             author-mail:            $mail
             feasibility-study:      $text
             approach-to-address:    $text
             assumptions:            $text
         status:
-            input:          type=string; values=[new, updated, confirmed, rejected]
+            input:                  $input_status
+
 
 linkage:
     - rat.rid [*] <- [*] prs.origin
 
-gates:
+severity:
     0:  name: valid
         test: 
             - verify_file_structure
@@ -48,3 +51,6 @@ gates:
     5:  name: ready
         test:
             - verify_acceptance_statuses
+
+    10: name: baseline
+        test: []

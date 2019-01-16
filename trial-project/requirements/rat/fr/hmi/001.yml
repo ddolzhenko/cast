@@ -1,1 +1,12 @@
-description: HMI must be written in qt
+origin:                     /rat/fr/hmi/001[baseline_y]
+text:                       HMI must be written in qt
+german-text:                german
+analysis: 
+    author-mail:            $mail
+    feasibility-study:      $text
+    approach-to-address:    $text
+    assumptions:            $text
+status:
+    input:                  $input_status
+    translation:            $translation_status
+

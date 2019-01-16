@@ -1,0 +1,3 @@
+linkage:
+    - spec.related_usecase [*] -> [*] use-cases.rid
+    

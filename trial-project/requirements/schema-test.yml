@@ -1,0 +1,18 @@
+# base.schema.yml
+$definitions:
+
+
+# base.yml
+students:
+    -   name: ivanov
+        age: 42
+    -   {name: petrov,  age: 42}
+    -   {name: sidorov, age: 42}
+    
+
+classes:
+    6b: [ivanov]
+    7a: 
+        - petrov
+        - sidorov
+
