@@ -16,6 +16,7 @@ def main():
         parser_update   = subparsers.add_parser('update',   help='update chaos database')
         parser_entropy  = subparsers.add_parser('entropy',  help='estimate entropy')
         parser_import   = subparsers.add_parser('import',   help='import various formats')
+        parser_generate = subparsers.add_parser('alpha-generate',  help='generate document by template')
 
         # judge    
         parser_judge.add_argument('project', type=str, help='project path')
@@ -48,7 +49,10 @@ def main():
         parser_import.add_argument('delta', type=str, help='path to delta file')
         parser_import.set_defaults(func=import_handler)
 
-        # import
+        # generate
+        parser_generate.add_argument('project', type=str, help='project')
+        parser_generate.add_argument('template', type=str, help='template')
+        parser_generate.set_defaults(func=generate_handler)
 
         # parse some argument lists
         args = parser.parse_args()
@@ -111,3 +115,8 @@ def import_handler(args):
 
         with open(args.delta, 'w') as f:
             serialize.as_file_list(patch, f)
+
+            
+def generate_handler(args):
+    log.debug('loading project: {}'.format(args.project))
+    log.debug('loading template: {}'.format(args.template))
