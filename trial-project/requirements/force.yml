@@ -1,10 +1,13 @@
 linkage:
-    - ci [1]<--[1] crs
-    - crs [*]<--[3] srs
+    - ci.rid [1] <-- [1] crs.origin
+    - c++std [*]<--[1] crs
+    - crs [*] <-- [*] srs
 
 
 requirement-schema:
-    # id: string
+    # rid: string
+    # origin:
+    # text: 
     brief: string # short description, informal
     description: string #description
     tags: list # any special tags used to categorize later                    

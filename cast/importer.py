@@ -8,8 +8,10 @@ def csv(db, importfile):
     import csv
     with open(importfile, newline='') as csvfile:
         spam = csv.reader(csvfile, delimiter=';')
-        for row in spam:
-            print(row)
+        header = spam[0]
+        spam = [spam][1:]
+        
+        
 
 
 

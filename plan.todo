@@ -10,35 +10,38 @@
 	-- add to pypi
 	-- documentation
 
-+-- command interface
-	+-- command line reader
-	+-- cast verify
-		+-- quality gates
-	+-- cast cutify
-	+-- cast query
-	+-- cast update
-	+-- cast entropy
+-- command interface
+	-- command line reader
+	-- cast judge
+		-- quality gates
+	-- cast cutify
+	-- cast query  /crs/hmi/[status=not-ready]
+	-- cast update 
+	-- cast entropy
+	-- cast import
 
 
 -- representration
-	+-- reserved keywords: must not be used user fileds naming
+	-- reserved keywords: must not be used user fileds naming
 		-- feature: means group of requiremnts
 			-- fid: feature id, mandatory
 		-- force: means forced settings for group of requiremnts (oganized hierarchically, lower level forces respect upper level ones)
 		-- requiremnt: requiremnts itself
 			-- origin: mandatory field for requiremnt.
 			-- acceptance: technical status. One of [updated, accepted, rejected]
-			-- rid: requiremnt id, mandatory field 
+			-- status: [registered, analysis, ready-for-baseline]
+			-- rid: requiremnt id, mandatory field
+			-- tags: [hmi, data, brigtness] 
 
 	-- folder-tree
 		- main representation, full feature set support
-		+- folders are feature names
-		+- one file = one requiremnt
-		+- file names are last level rid
+		- folders are feature names
+		- one file = one requiremnt
+		- file names are last level rid
 		- last level rid must be 3 digit number: 001, 002, 999
 		- recommended rule no more than 100 reqs in section allowed
 		- force.yml file contains info about constraints on certain level
-			- must contain linage info
+			- must contain linkage info
 			- must contain requiremnt schema
 			- must contain default query filters: like query only not rejected
 			- must contain allowed tags list
@@ -47,7 +50,7 @@
 			-- single image associated with requirement in png format can be used
 				-- must be named same as file in db
 			-- embedded images must be able to embed to markdown
-				-- path to images must be ralative to corresponding requirement file
+				-- path to images must be relative to corresponding requirement file
 				-- recommended to create folder ./img and store images there
 				-- must support (jpg, svg, png)
 			-- embedded puml diagramms must be supported
@@ -97,17 +100,18 @@
 	-- quality gates:
 		- document consistent
 			- structure ok (yaml parceable)
+			- is cute
 			- structure constraints ok:
-				- all tags are allowed
 				- schema constrains ok (not broken)
+				- all tags are allowed
 				- links constraints ok
 			- statuses are correct
-				- each scion mus have status, and quality gate same or lower then parents
-			- is cute
+				- each scion must have status, and quality gate same or lower then parents
 		- traceability established (everybody has origin set)
 		- ready to baseline (TODO: rename)
-			-- all acceptance statuses are accepted or rejected
-
+			-- all requirements acceptance statuses are accepted or rejected
+			-- consistent with whole origin document
+		- baselined
 -- cutify
 	-- just read and write back
 
@@ -121,12 +125,12 @@
 		-- to .update folder
 		-- to stdoutput in form parseable by IDE
 
------ update
-	-- read target repr
-	-- read update repr
-	-- patch target with update
-	-- serialize target back preserving it's structure
-	-- must be cute
++----- update
+	+-- read target repr
+	+-- read update repr
+	+-- patch target with update
+	+-- serialize target back preserving it's structure
+	+-- must be cute
 
 -- entropy
 	-- calculate entropy by some formula
