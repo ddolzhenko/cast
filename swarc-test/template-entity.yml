@@ -1,0 +1,20 @@
+
+
+general:
+    entity_title: software
+    sub_entity_title: domain
+
+    brief: brief description
+    description: |
+        multiline 
+        description
+
+    definitions: !table
+        head: [term, definition]
+        lines:
+            - {"term":"sw", "definition":"software"}
+            - {"term":"hw", "definition":"hardware"}
+
+
+            
+    

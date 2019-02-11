@@ -1,6 +1,15 @@
 
-
 TODO macro table
+{% macro table(db) %}
+
+{% if db.head %}
+{{ printhead(db.head) }}
+
+{% for line in db.lines %}
+{{ printline(line) }}
+
+{% endmacro %}
+
 
 
 {% macro document(entity, level) %}
@@ -93,7 +102,7 @@ TODO:
 {{ diagram(entity.structure.diagram.dependencies_internal) }}
 
 
-== Dynamic view
+== Dynamic View
 
 === Startup
 {{ table(entity.dynamic.startup.driving_requiremnts) }}
