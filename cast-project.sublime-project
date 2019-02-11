@@ -36,8 +36,8 @@
                     "cmd": ["python", "cast-debug.py", "import", "trial-project", "trial-imports/test1.csv", "trial-updates/import1.yml"],
                 },
                 {
-                    "name": "cast alpha-generate prop-tests/prs.yml prop-tests/templates/adoc.template",
-                    "cmd": ["python", "cast-debug.py", "alpha-generate", "prop-tests/prs.yml", "prop-tests/templates/adoc.template"],
+                    "name": "cast alpha-generate prop-test/prs.yml prop-test/templates/adoc.template",
+                    "cmd": ["python", "cast-debug.py", "alpha-generate", "prop-test/prs.yml", "prop-test/templates/adoc.template"],
                 },
 
                 {

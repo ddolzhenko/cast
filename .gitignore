@@ -1,3 +1,5 @@
 *.sublime-workspace
 __pycache__
 prop-test
+prop-test_products
+prop-test-products

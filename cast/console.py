@@ -1,6 +1,6 @@
 # @author   d.dolzhenko@gmail.com
 
-import sys, traceback, argparse
+import os, sys, traceback, argparse, dirutil
 from cast import log 
 
 
@@ -116,7 +116,24 @@ def import_handler(args):
         with open(args.delta, 'w') as f:
             serialize.as_file_list(patch, f)
 
-            
+def split_path(path):
+    src = os.path.abspath(path)
+    return os.path.split(src)
+
+
 def generate_handler(args):
     log.debug('loading project: {}'.format(args.project))
     log.debug('loading template: {}'.format(args.template))
+
+    from cast import chaos
+
+    filepath, filename = split_path(args.project)
+    templatepath, templatefile = split_path(args.template)
+    template = os.path.join(templatepath, templatefile)
+
+
+    prs = chaos.load_prs(filepath, filename)
+    with dirutil.work_safe_mkdir(filepath + '-products'):
+        outfile = os.path.splitext(filename)[0] + '.' + os.path.splitext(templatefile)[0]
+        chaos.render_prs(prs, template, outfile)
+
