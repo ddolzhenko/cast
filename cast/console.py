@@ -56,7 +56,8 @@ def main():
 
         # parse some argument lists
         args = parser.parse_args()
-        args.func(args)
+        if hasattr(args, 'func'):
+            args.func(args)
 
     except Exception as e:
         log.error('<{}>: {}'.format(sys.exc_info()[0], e))

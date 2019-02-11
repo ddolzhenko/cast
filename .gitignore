@@ -3,3 +3,5 @@ __pycache__
 prop-test
 prop-test_products
 prop-test-products
+cast.egg-info/
+dist/
