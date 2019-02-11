@@ -1,0 +1,163 @@
+
+
+TODO macro table
+
+
+{% macro document(entity, level) %}
+{{ '=' + entity.general.entity_title }}
+
+== Overview
+{{ entity.general.brief }}
+
+=== Description
+{{ entity.general.description }}
+
+=== Definitions
+{{ table(entity.general.definitions) }}
+
+== Decision Register
+TODO
+
+== Development view
+
+=== Process
+TODO
+1. SWE(1-6)
+2. Integration strategy or reference
+3. Testing strategy reference
+
+{{ table(entity.development.processes) }}
+
+=== Stakeholders
+TODO
+1. customer-interfaces (Including customer managed suppliers)
+2. MYCompany project interfaces (Managerial, Technical)
+3. MYCompany internal stakeholders (Business, Legal)
+4. RASICs
+
+{{ table(entity.development.stakeholders) }}
+
+=== Naming conventions
+
+==== References
+Reference to CMP if needed
+
+==== {{ entity.general.sub_entity_title }} Naming Conventions
+{{ table(entity.development.naming.entities) }}
+
+==== Traces Naming Conventions
+{{ table(entity.development.naming.traces) }}
+
+=== Coding
+
+==== Programming languages & required tools
+TODO
+Coding style/guide
+Static code check tools
+Dynamic code check tools
+Debug/Trace tools
+
+==== 3rd party libraries/tools. For each:
+TODO
+1. Feasibility study
+2. License analysis
+3. Usage limitations (which part and where)
+4. Applicable processes (i/e should be static check it?)
+
+{{ table(entity.development.third-party-tools) }}
+
+
+== Structure View
+
+=== Overview
+TODO:
+1. Diagram
+2. Table of entities: name/description/link-to-subdocument)
+{{ diagram(entity.structure.diagram.entities) }}
+{{ table(entity.structure.entities) }}
+
+=== Interfaces
+{{ diagram(entity.structure.diagram.entities_and_interfaces) }}
+{{ table(entity.structure.interfaces) }}
+
+
+=== Dependencies
+
+==== External Dependencies "on-me"
+{{ diagram(entity.structure.diagram.dependencies_on_me) }}
+
+==== External Dependencies "me_on"
+{{ diagram(entity.structure.diagram.dependencies_me_on) }}
+
+==== Internal Dependencies
+{{ diagram(entity.structure.diagram.dependencies_internal) }}
+
+
+== Dynamic view
+
+=== Startup
+{{ table(entity.dynamic.startup.driving_requiremnts) }}
+s{% for d in entity.dynamic.startup.diagrams %}
+{{ diagram(d) }}
+
+=== Shutdown
+{{ table(entity.dynamic.shutdown.driving_requiremnts) }}
+s{% for d in entity.dynamic.shutdown.diagrams %}
+{{ diagram(d) }}
+
+=== Error handling
+{{ table(entity.dynamic.error_handling.driving_requiremnts) }}
+s{% for d in entity.dynamic.error_handling.diagrams %}
+{{ diagram(d) }}
+
+=== Life Cycle
+TODO:
+1. Most important cross domain sequence diagrams
+2. must cover all cross domain communication
+3. must show cross domain calls or data-flow
+4. Recommended not to show details of dynamic behavior inside domain
+{{ table(entity.dynamic.life_cycle.driving_requiremnts) }}
+s{% for d in entity.dynamic.life_cycle.diagrams %}
+{{ diagram(d) }}
+
+
+== Deployment view
+
+TODODODODO
+    System topology (must be linked to System Architecture)
+        HW alignment
+        System interfaces
+    Software topology (which component align to..)
+        CPU/Core alignment
+        Processes/threads/tasks alignment
+        Inter process communication methods (IPC)
+    Data topology (for each: where stored, how managed)
+        Persistent data
+        Configurations
+        Variants
+        Variant management
+    Resources allocation restrictions
+        CPU
+        GPU
+        RAM
+        Storage
+        Bandwidth
+        other
+
+  5
+Data management view
+
+    Data (database) structure
+    Data integrity strategy
+    Data backup/restore strategy
+
+  5
+Perspectives
+
+    Performance
+    Security
+
+  TODO
+
+{% endmacro %}
+

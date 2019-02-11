@@ -1,0 +1,119 @@
+
+
+stakeholders: !include    stakeholders.yml
+
+definitions:
+    - SW Elements hierarchy:
+        Layers
+        Domains
+        Components
+        Units
+    - Interfaces types:
+        Native
+        Common API
+        Other
+
+  
+Software/Project requirements 
+
+References to requirements that applied on SW level
+
+    id
+    description
+    link to SWAD section where addressed
+
+  2,7
+
+- Decisions register:
+    - !decision     
+  
+
+List of decisions related to whole SW. Each record must include:
+
+    id
+    decision description
+    link to RR (versioned and locked):
+        RR itself must have origin records to SW requirements
+    link to project requirements
+    link to SWAD particular chapters
+
+  7
+
+
+Development view  
+
+    Naming conventions
+        Naming conventions for software entities
+        traces naming conventions
+        Reference to CMP if needed
+    Development process references  (SWE1-6)
+    Programming languages & required tools
+        Coding style/guide
+        Static code check tools
+        Dynamic code check tools
+        Debug/Trace tools
+    3rd party libraries/tools. For each:
+        Feasibility study
+        License analysis
+        Usage limitations (which part and where)
+        Applicable processes (i/e should be static check it?)
+    Integration strategy or reference
+    Testing strategy reference
+
+- Static view:
+
+    - !layer/System
+
+    Layers
+    Domains
+        Links to HDDs or HDD chapters
+    Components
+    Cross domain interfaces
+
+  3
+Dynamic view  
+
+    Startup/shutdown
+    Error handling
+    Most important cross domain sequence diagrams
+        must cover all cross domain communication
+        must show cross domain calls or dataflow
+        recommended not to show details of dynamic behavior inside domain
+
+  4
+Deployment view 
+
+    System topology (must be linked to System Architecture)
+        HW alignment
+        System interfaces
+    Software topology (which component align to..)
+        CPU/Core alignment
+        Processes/threads/tasks alignment
+        Inter process communication methods (IPC)
+    Data topology (for each: where stored, how managed)
+        Persistent data
+        Configurations
+        Variants
+        Variant management
+    Resources allocation restrictions
+        CPU
+        GPU
+        RAM
+        Storage
+        Bandwidth
+        other
+
+  5
+Data management view  
+
+    Data (database) structure
+    Data integrity strategy
+    Data backup/restore strategy
+
+  5
+Perspectives  
+
+    Performance
+    Security
+
+  TODO
