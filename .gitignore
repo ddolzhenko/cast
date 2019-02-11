@@ -5,3 +5,4 @@ prop-test_products
 prop-test-products
 cast.egg-info/
 dist/
+build/
