@@ -27,8 +27,12 @@
 === Definitions
 {{ table(entity.general.definitions) }}
 
+=== Allocated Requirements
+{{ table(entity.general.driving_requirements) }}
+
 == Decision Register
-TODO
+{{ table(entity.general.decisions) }}
+
 
 == Development view
 

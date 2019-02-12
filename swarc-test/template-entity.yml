@@ -1,5 +1,3 @@
-
-
 general:
     entity_title: software
     sub_entity_title: domain
@@ -15,6 +13,13 @@ general:
         lines:
             - {term: hw, definition: hardware}
             - {term: sw, definition: software}
+
+    driving_requirements: !trace
+        - <link-to-prs-1>   # links to prs ids (guid)
+        - <link-to-prs-2>
+        - <link-to-prs-3>
+        - <link-to-dd-1>    # links to design decisions (from RR)
+        - <link-to-dd-2>    
 
     decisions: !table
         head: ["id", "description"]
@@ -78,10 +83,10 @@ development:
                 - {type: SW Entity, name: Unit, convention: CamelCase}
                 - {type: Code Repo, name: Component Repository, convention: link to componet naming conventions}
 
-        traces: !traces  # like domains|components
+        traces: !table  # like domains|components
             head: [name, purpose, convention]
             lines: 
-                - {name: SW Startup/Shutdown, purpose: testing of livicycle behaviour, convention: <SW_ID>.<LIFE-CYCLE>.<life cycle mode> }
+                - {name: SW Startup/Shutdown, purpose: testing of livecycle behaviour, convention: <SW_ID>.<LIFE-CYCLE>.<life cycle mode> }
                 - {name: Component Sequence Trace, purpose: to be able to trace dynamic component behaviour, convention: <SW_ID>.<SEQ>.<SEQ_ID> }
     
     guides: !table
@@ -93,23 +98,28 @@ development:
             - {what: Debugging tools,    link: link, rationale: link-to-rr}
             - {what: Trace tools,        link: link, rationale: link-to-rr}
 
-    third-party:
-        head: [what, brief, type, licence, limitations, applicable-processes]
+    third-party: !table
+        # todo: comments expected
+        head: [what, version, brief, type, licence, limitations, applicable-processes, rationale]
         lines:
             -   what: boost.variant
+                version: 2.0
                 brief: common C++ library supporting variant
                 type: library
                 licence: boost sw lisence
                 limitations: used version must be stored in our repo
                 applicable-processes: SUP.8 (configuration management)
+                rationale: rr-link
             -   what: CustomerFramework
+                version: 2.0
                 brief: Platform abstraction framework
                 type: SDK
                 licence: "?"
                 limitations: link to RR with decisions here
                 applicable-processes: SUP.8 (configuration management)
+                rationale: rr-link
 
-structure:
+structure: # same as static
 
     driving_requirements: !trace
         - <link-to-prs-1>   # links to prs ids
@@ -118,26 +128,28 @@ structure:
         - <link-to-dd-1>    # links to design decisions (from RR)
         - <link-to-dd-2>    
 
-    entities: 
+    entities:
         Model:
+            details: !include/swarc domains/Model.yml
             interfaces:
-                ModelAPI:   link
+                ModelAPI:  link to IDL (git)
                 ILifeCycle: link
         View:
+            details: !include/swarc domains/View.yml
             interfaces:
                 ISceneGraph: link
                 ILifeCycle: link
         Controller:
         LifeCycleManager:
     
+    # in relations and dependencies plant uml relations can be used (i.e. '->')
 
     relations:  # internal relations
-        Model -> View: Updates
-        Controller -> Model: Manipulates
+        Model       -> View: Updates
+        Controller  -> View.ISceneGraph: Manipulates
 
     dependencies:   # external dependencies (only me-on  X)
         Model ->    Platform.Database.API: Reads
-        
 
 
 dynamic:
