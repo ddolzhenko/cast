@@ -110,7 +110,86 @@ development:
                 applicable-processes: SUP.8 (configuration management)
 
 structure:
-    entities:
+
+    driving_requirements: !trace
+        - <link-to-prs-1>   # links to prs ids
+        - <link-to-prs-2>
+        - <link-to-prs-3>
+        - <link-to-dd-1>    # links to design decisions (from RR)
+        - <link-to-dd-2>    
+
+    entities: 
+        Model:
+            interfaces:
+                ModelAPI:   link
+                ILifeCycle: link
+        View:
+            interfaces:
+                ISceneGraph: link
+                ILifeCycle: link
+        Controller:
+        LifeCycleManager:
+    
+
+    relations:  # internal relations
+        Model -> View: Updates
+        Controller -> Model: Manipulates
+
+    dependencies:   # external dependencies (only me-on  X)
+        Model ->    Platform.Database.API: Reads
+        
 
 
 dynamic:
+
+    driving_requirements: !trace
+        - <link-to-prs-1>   # links to prs ids
+        - <link-to-prs-2>
+        - <link-to-prs-3>
+        - <link-to-dd-1>    # links to design decisions (from RR)
+        - <link-to-dd-2>    
+
+
+    startup:
+        driving_requirements: !trace
+            - <link-to-prs-1>   # links to prs ids
+            - <link-to-dd-1>    # links to design decisions (from RR)
+        
+        sequences:
+            normal startup: !sequence
+                brief: normal startup sequence
+                flow: !include/puml linktopuml
+            restart: !sequence
+                brief: This sequence initiated after watch dog killed us
+                flow:
+                    - -> LifeCycleManager: start signal
+                    - LifeCycleManager -> Controller: create
+
+    shutdown:
+        driving_requirements: !trace
+            - <link-to-prs-1>   # links to prs ids
+            - <link-to-dd-1>    # links to design decisions (from RR)
+        
+        sequences:
+    
+    error_handling:
+        driving_requirements: !trace
+            - <link-to-prs-1>   # links to prs ids
+            - <link-to-dd-1>    # links to design decisions (from RR)
+        
+        sequences:
+        
+    normal:
+        # normal operational flows
+        driving_requirements: !trace
+            - <link-to-prs-1>   # links to prs ids
+            - <link-to-dd-1>    # links to design decisions (from RR)
+        
+        sequences:
+
+deployment:
+
+    TODO:
+data_management:
+
+    TODO:

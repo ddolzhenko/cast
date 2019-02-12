@@ -85,8 +85,22 @@ TODO
 
 == Structure View
 
-=== Overview
-TODO:
+=== Allocated Requirements
+{{ table(entity.structure.driving_requirements) }}
+
+=== Environment
+
+==== Overview
+{{ diagram(entity.structure.diagram.environment_overview) }}
+
+==== External Dependencies "on-me"
+{{ diagram(entity.structure.diagram.dependencies_on_me) }}
+
+==== External Dependencies "me_on"
+{{ diagram(entity.structure.diagram.dependencies_me_on) }}
+
+==== Internals
+
 1. Diagram
 2. Table of entities: name/description/link-to-subdocument)
 {{ diagram(entity.structure.diagram.entities) }}
@@ -96,20 +110,14 @@ TODO:
 {{ diagram(entity.structure.diagram.entities_and_interfaces) }}
 {{ table(entity.structure.interfaces) }}
 
-
-=== Dependencies
-
-==== External Dependencies "on-me"
-{{ diagram(entity.structure.diagram.dependencies_on_me) }}
-
-==== External Dependencies "me_on"
-{{ diagram(entity.structure.diagram.dependencies_me_on) }}
-
 ==== Internal Dependencies
 {{ diagram(entity.structure.diagram.dependencies_internal) }}
 
 
 == Dynamic View
+
+=== Allocated Requirements
+{{ table(entity.dynamic.driving_requirements) }}
 
 === Startup
 {{ table(entity.dynamic.startup.driving_requirements) }}
@@ -126,7 +134,7 @@ s{% for d in entity.dynamic.shutdown.diagrams %}
 s{% for d in entity.dynamic.error_handling.diagrams %}
 {{ diagram(d) }}
 
-=== Life Cycle
+=== Normal Flows
 TODO:
 1. Most important cross domain sequence diagrams
 2. must cover all cross domain communication
@@ -138,6 +146,9 @@ s{% for d in entity.dynamic.life_cycle.diagrams %}
 
 
 == Deployment view
+
+=== Allocated Requirements
+{{ table(entity.deployment.driving_requirements) }}
 
 TODODODODO
     System topology (must be linked to System Architecture)
