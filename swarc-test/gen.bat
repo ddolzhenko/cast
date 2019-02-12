@@ -1,0 +1,1 @@
+asciidoctor -a toc test-table.adoc

@@ -1,12 +1,15 @@
-
-TODO macro table
 {% macro table(db) %}
 
+[width="100%", options="header"]
 {% if db.head %}
-{{ printhead(db.head) }}
+{%- for key in db.head -%} |{{ key }} {%- endfor %}
+{% endif %}
 
+|=========================================================
 {% for line in db.lines %}
-{{ printline(line) }}
+{%- for key in db.head -%} |{{ line.get(key, db.default) }} {%- endfor %}
+{% endfor %}
+|=========================================================
 
 {% endmacro %}
 

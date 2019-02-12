@@ -17,4 +17,10 @@ general:
 
 
             
-    
+    # ///////////////////////////////////////
+
+structure:
+    entities:
+        
+
+dynamic:
