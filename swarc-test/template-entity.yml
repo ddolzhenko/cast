@@ -4,6 +4,7 @@ general:
     entity_title: software
     sub_entity_title: domain
 
+    name: Entity name
     brief: brief description
     description: |
         multiline 
@@ -12,15 +13,104 @@ general:
     definitions: !table
         head: [term, definition]
         lines:
-            - {"term":"sw", "definition":"software"}
-            - {"term":"hw", "definition":"hardware"}
+            - {term: hw, definition: hardware}
+            - {term: sw, definition: software}
 
+    decisions: !table
+        head: ["id", "description"]
+        lines:
+            - {"id": "sw-dev-lang-1", "description": "Software will be written in C++"}
 
             
     # ///////////////////////////////////////
 
+development:
+
+    driving_requirements: !trace
+        - <link-to-prs-1>   # links to prs ids
+        - <link-to-prs-2>
+        - <link-to-prs-3>
+        - <link-to-dd-1>    # links to design decisions (from RR)
+        - <link-to-dd-2>    
+
+
+    stakeholders: !table
+        head: [company, role, brief, name, mail]
+        lines:
+            -   company:  ClientCompany
+                role:     Requirements Manager
+                brief:    Provides Customer Requiremnts   
+                name:     Ivan Ivanov
+                mail:     ivanov.ivan@clientcompany.com
+            -   company:  MyCompany
+                role:     Requirements Manager
+                brief:    Responsible for Software Requiremnts   
+                name:     Ivan Petrov
+                mail:     petrov.ivan@mycompany.com
+
+
+    processes: !table
+        # references to applicable processes definitions or tailored ones
+        head: ["work product", "process", "link"]
+        lines:
+            -   work product: PRS
+                process: SWE.1
+                link:  link-to
+            -   work product: SW Architectural Design Process
+                process: SWE.2
+                link:  link-to
+            -   work product: SW Detailed Design Process 
+                process: SWE.3
+                link:  link-to
+            -   work product: Integration Strategy
+                process: SWE.5
+                link:  link-to
+            -   work product: Testing Strategy
+                process: SWE.6
+                link:  link-to
+    
+    naming:
+        entities: !table  # like domains|components
+            head: [type, name, convention]
+            lines: 
+                - {type: SW Entity, name: Domain, convention: Any}
+                - {type: SW Entity, name: Component, convention: CamelCase}
+                - {type: SW Entity, name: Unit, convention: CamelCase}
+                - {type: Code Repo, name: Component Repository, convention: link to componet naming conventions}
+
+        traces: !traces  # like domains|components
+            head: [name, purpose, convention]
+            lines: 
+                - {name: SW Startup/Shutdown, purpose: testing of livicycle behaviour, convention: <SW_ID>.<LIFE-CYCLE>.<life cycle mode> }
+                - {name: Component Sequence Trace, purpose: to be able to trace dynamic component behaviour, convention: <SW_ID>.<SEQ>.<SEQ_ID> }
+    
+    guides: !table
+        head: [what, link, rationale]
+        lines:
+            - {what: Coding Style/Guide, link: link, rationale: link-to-rr}
+            - {what: Static code check,  link: link, rationale: link-to-rr}
+            - {what: Dynamic code check, link: link, rationale: link-to-rr}
+            - {what: Debugging tools,    link: link, rationale: link-to-rr}
+            - {what: Trace tools,        link: link, rationale: link-to-rr}
+
+    third-party:
+        head: [what, brief, type, licence, limitations, applicable-processes]
+        lines:
+            -   what: boost.variant
+                brief: common C++ library supporting variant
+                type: library
+                licence: boost sw lisence
+                limitations: used version must be stored in our repo
+                applicable-processes: SUP.8 (configuration management)
+            -   what: CustomerFramework
+                brief: Platform abstraction framework
+                type: SDK
+                licence: "?"
+                limitations: link to RR with decisions here
+                applicable-processes: SUP.8 (configuration management)
+
 structure:
     entities:
-        
+
 
 dynamic:

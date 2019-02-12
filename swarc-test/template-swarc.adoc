@@ -16,7 +16,7 @@
 
 
 {% macro document(entity, level) %}
-{{ '=' + entity.general.entity_title }}
+= This document describes **{{ entity.general.name }}* _{{ entity.general.entity_title }}_
 
 == Overview
 {{ entity.general.brief }}
@@ -32,13 +32,8 @@ TODO
 
 == Development view
 
-=== Process
-TODO
-1. SWE(1-6)
-2. Integration strategy or reference
-3. Testing strategy reference
-
-{{ table(entity.development.processes) }}
+=== Allocated Requirements
+{{ table(entity.development.driving_requirements) }}
 
 === Stakeholders
 TODO
@@ -48,6 +43,14 @@ TODO
 4. RASICs
 
 {{ table(entity.development.stakeholders) }}
+
+=== Process
+TODO
+1. SWE(1-6)
+2. Integration strategy or reference
+3. Testing strategy reference
+
+{{ table(entity.development.processes) }}
 
 === Naming conventions
 
@@ -60,7 +63,7 @@ Reference to CMP if needed
 ==== Traces Naming Conventions
 {{ table(entity.development.naming.traces) }}
 
-=== Coding
+=== Guides
 
 ==== Programming languages & required tools
 TODO
@@ -68,6 +71,7 @@ Coding style/guide
 Static code check tools
 Dynamic code check tools
 Debug/Trace tools
+{{ table(entity.development.guides) }}
 
 ==== 3rd party libraries/tools. For each:
 TODO
@@ -76,7 +80,7 @@ TODO
 3. Usage limitations (which part and where)
 4. Applicable processes (i/e should be static check it?)
 
-{{ table(entity.development.third-party-tools) }}
+{{ table(entity.development.third-party) }}
 
 
 == Structure View
@@ -108,17 +112,17 @@ TODO:
 == Dynamic View
 
 === Startup
-{{ table(entity.dynamic.startup.driving_requiremnts) }}
+{{ table(entity.dynamic.startup.driving_requirements) }}
 s{% for d in entity.dynamic.startup.diagrams %}
 {{ diagram(d) }}
 
 === Shutdown
-{{ table(entity.dynamic.shutdown.driving_requiremnts) }}
+{{ table(entity.dynamic.shutdown.driving_requirements) }}
 s{% for d in entity.dynamic.shutdown.diagrams %}
 {{ diagram(d) }}
 
 === Error handling
-{{ table(entity.dynamic.error_handling.driving_requiremnts) }}
+{{ table(entity.dynamic.error_handling.driving_requirements) }}
 s{% for d in entity.dynamic.error_handling.diagrams %}
 {{ diagram(d) }}
 
@@ -128,7 +132,7 @@ TODO:
 2. must cover all cross domain communication
 3. must show cross domain calls or data-flow
 4. Recommended not to show details of dynamic behavior inside domain
-{{ table(entity.dynamic.life_cycle.driving_requiremnts) }}
+{{ table(entity.dynamic.life_cycle.driving_requirements) }}
 s{% for d in entity.dynamic.life_cycle.diagrams %}
 {{ diagram(d) }}
 
