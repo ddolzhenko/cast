@@ -58,7 +58,7 @@ development:
         # references to applicable processes definitions or tailored ones
         head: ["work product", "process", "link"]
         lines:
-            -   work product: PRS
+            -   work product: SWE.1 assests
                 process: SWE.1
                 link:  link-to
             -   work product: SW Architectural Design Process
@@ -200,6 +200,48 @@ dynamic:
         sequences:
 
 deployment:
+
+    driving_requirements: !trace
+        - <link-to-prs-1>   # links to prs ids
+        - <link-to-prs-2>
+        - <link-to-prs-3>
+        - <link-to-dd-1>    # links to design decisions (from RR)
+        - <link-to-dd-2>    
+
+    node_types:
+        ECU: computation unit 
+        HWPartition: hypervisor partiotion
+
+    nodes:
+        ECU1:
+            type: ECU
+            purpose: detailed puprose
+
+
+    system_topology:
+        HW alignment
+        System interfaces
+    software_topology:
+        CPU/Core alignment
+        Processes/threads/tasks alignment
+        Inter process communication methods (IPC)
+    data_topology: !table
+        head: [name, node, how_managed]
+        lines:
+            - {what: Persistent data: , rationale: link-to-rr}
+
+        Persistent data
+        Configurations
+        Variants
+        Variant management
+    Resources allocation restrictions
+        CPU
+        GPU
+        RAM
+        Storage
+        Bandwidth
+        other
+
 
     TODO:
 data_management:
