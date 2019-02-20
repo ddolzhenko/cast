@@ -54,6 +54,8 @@ class Subsection:
         self.subsections = []
 
         for name, sub_db in db.items():
+            if isinstance(name, int):
+                name = str(name)
             assert isinstance(name, str)
             if '.' in name:
                 sid, title = name.split('.')
@@ -64,6 +66,8 @@ class Subsection:
 def fix_list(db, name):
     obj = db.get(name, [])
     obj = [obj] if isinstance(obj, str) else obj
+    if obj is None:
+        obj = []
     assert isinstance(obj, list)
     return obj
 
