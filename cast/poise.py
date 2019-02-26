@@ -8,6 +8,18 @@ from cast import log
 
 ext = '.yml'
 
+# helpers
+def get_not_none(db, key, expected_type):
+    x = db.get(key)
+    x = expected_type() if key is None else key
+    return expected_type(x)
+
+get_str     = lambda db, key: get_not_none(db, x, str)
+get_list    = lambda db, key: get_not_none(db, x, list)
+get_dict    = lambda db, key: get_not_none(db, x, dict)
+
+# -----------------------------------------------------------------
+
 class Load_error(Exception): pass
 
 def stop_if(cond, error_class, *params):
@@ -29,6 +41,14 @@ class Lazy_sequence:
         self.brief = brief
         self.relations = realtions
         self.puml = None
+
+class Lazy_entity:
+    def __init__(self, typename, brief, description, details, interfaces)
+        self.typename=typename
+        self.brief=brief
+        self.description=description
+        self.details=details
+        self.interfaces=interfaces
 
 class Relation:
     def __init__(self, x, y, typename='association'):
@@ -53,13 +73,9 @@ class Message:
 
 def load_table(t):
     assert isinstance(t, dict), 
-    default = t.get('default', '')
-    head = t.get('head', [])
-    lines = t.get('lines', [])
-
-    not_list = lambda x: not isinstance(x, list)
-    stop_if(not_list(head), Load_error, 'table.head must be a list')
-    stop_if(not_list(lines), Load_error, 'table.lines must be a list of dicts')
+    default = get_str('default')
+    head    = get_list(t, 'head')
+    lines   = get_list(t, 'lines')
     for line in lines:
         stop_if(not_list(line), Load_error, 'table.lines must be a list of dicts')
 
@@ -67,7 +83,6 @@ def load_table(t):
 
 def load_trace(t):
     return Lazy_trace([str(x) for x in t])
-
 
 
 def parse_relation(relation):
@@ -96,87 +111,108 @@ def load_puml(path, pumlfile):
 
 def load_sequence(db):
     assert isinstance(db, dict)
-    brief = str(db.get('brief', ''))
-    flow = db.get('flow', dict())
-    flow = dict is flow is None else flow
-    flow = list(map(parse_sequence_message, flow))
+    brief = get_str(db, 'brief')
+    flow = list(map(parse_sequence_message, get_list(db, 'flow')))
     return Lazy_sequence(brief=brief, flow=flow)
-     
+
+def load_entity(entity, typename):
+    brief       = get_str(entity, 'brief')
+    desc        = get_str(entity, 'description')
+    details     = get_dict(entity, 'details')
+    interfaces  = get_dict(entity, 'interfaces')
+    return Lazy_entity( typename=typename, 
+                        brief=brief, 
+                        description=desc, 
+                        details=details, 
+                        interfaces=interfaces)
+
+def load_entities(entity, typename):
+    assert isinstance(entity, dict)
+    return {name: load_enity(value, typename) for name, value in entity.items()}
 
 def load_swarc(filepath, filename):
     src = os.path.join(filepath, filename)
-    log.verbose('loading spec module: ' + src)
+    log.verbose('loading swarc: ' + src)
     
     class Loader(yaml.Loader): pass
     Loader.add_constructor('!include/swarc',
         lambda loader, x: load_swarc(filepath, loader.construct_scalar(x)))
     Loader.add_constructor('!include/puml',
         lambda loader, x: load_puml(filepath, loader.construct_scalar(x)))
+    
+    Loader.add_constructor('!unit',
+        lambda loader, x: load_entity(loader.construct_mapping(x), 'unit'))
+    Loader.add_constructor('!units',
+        lambda loader, x: load_entities(loader.construct_mapping(x), 'unit'))
+    Loader.add_constructor('!component',
+        lambda loader, x: load_entity(loader.construct_mapping(x), 'component'))
+    Loader.add_constructor('!components',
+        lambda loader, x: load_entities(loader.construct_mapping(x), 'component'))
+    Loader.add_constructor('!domain',
+        lambda loader, x: load_entity(loader.construct_mapping(x), 'domain'))
+    Loader.add_constructor('!domains',
+        lambda loader, x: load_entities(loader.construct_mapping(x), 'domain'))
+
+    Loader.add_constructor('!node',
+        lambda loader, x: load_entity(loader.construct_mapping(x), 'node'))
+    Loader.add_constructor('!nodes',
+        lambda loader, x: load_entities(loader.construct_mapping(x), 'node'))
+    
+    Loader.add_constructor('!sequence', 
+        lambda loader, x: load_sequence(loader.construct_mapping(x)))
+    
     Loader.add_constructor('!table', 
         lambda loader, x: load_table(loader.construct_mapping(x)))
     Loader.add_constructor('!trace', 
         lambda loader, x: load_trace(loader.construct_sequence(x)))
-    Loader.add_constructor('!sequence', 
-        lambda loader, x: load_sequence(loader.construct_mapping(x)))
     with open(src) as f:
         return yaml.load(f, Loader=Loader)
 
-def load_swarc(filepath, filename):
-    db = load_db(filepath, filename)
-    
-    prj = Project()
-    load_project(filepath, filename, prj)
+def load_prs(filepath, filename):
+    src = os.path.join(filepath, filename)
+    log.verbose('loading prs: ' + src)
+
+    class Loader(yaml.Loader): pass
+    Loader.add_constructor('!include',
+        lambda loader, x: load(filepath, loader.construct_scalar(x)))
+    with open(src) as f:
+        return yaml.load(f, Loader=Loader)
+
+def load(filepath, filename):
+    src = os.path.join(filepath, filename)
+    log.verbose('loading: ' + src)
+   
+    class Loader(yaml.Loader): pass
+    Loader.add_constructor('!include/swarc',
+        lambda loader, x: load_swarc(filepath, loader.construct_scalar(x)))
+    Loader.add_constructor('!include/prs',
+        lambda loader, x: load_prs(filepath, loader.construct_scalar(x)))
+    Loader.add_constructor('!include',
+        lambda loader, x: load(filepath, loader.construct_scalar(x)))
+    with open(src) as f:
+        return yaml.load(f, Loader=Loader)
+
+# ----------------------------------------------------------------------
+class Objects:
+    def __init__(self):
+        self.
 
 
-class Subsection:
-    def __init__(self, path, title, db):
-        text = ''
-        if isinstance(db, str):
-            text = db
-            db = dict()
-        elif db is None:
-            db = dict()
-        elif isinstance(db, dict):
-            pass
-        else:
-            log.error('dict expected in {}'.format('/'.join(path)))
-            return
+def compile_objects(data):
+    def parser(obj, tree):
 
-        assert isinstance(db, dict)
-        assert isinstance(path, list)
 
-        self.path = path
-        self.title = title
-        self.text = text
-        self.requirements = []
-        self.subsections = []
-
-        for name, sub_db in db.items():
-            assert isinstance(name, str)
-            if '.' in name:
-                sid, title = name.split('.')
-                self.subsections.append(Subsection(path+[sid], title, sub_db))
-            else:
-                self.requirements.append(Requirement(path+[name], sub_db))
-
-def fix_list(db, name):
-    obj = db.get(name, [])
-    obj = [obj] if isinstance(obj, str) else obj
-    assert isinstance(obj, list)
+    obj = Objects()
+    parser(obj, data)
     return obj
 
-class Requirement:
-    def __init__(self, path, db):
-        if isinstance(db ,str):
-            db = {'description': db}
+@monadic
+def do_all():
+    data = load(filepath, filename)
+    obj = compile_objects(data)
+    lib = link(obj)
+    return lib
 
-        self.rid         = '.'.join(path)
-        self.guid        = db.get('guid', uuid.uuid4())
-        self.description = db.get('description', '')
-        self.verification_criteria = db.get('verification-criteria', '')
-        self.origin         = fix_list(db, 'origin')
-        self.dependencies   = fix_list(db, 'dependencies')
-        self.links          = fix_list(db, 'links')
 
 def render_prs(prs, templatefile, outfile):
     with open(templatefile) as f:
