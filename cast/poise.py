@@ -26,6 +26,14 @@ def stop_if(cond, error_class, *params):
     if cond:
         raise error_class('Stop error: {}'.format(''.join(params)))
 
+class Lazy_swarc:
+    def __init__(self, db):
+        self.db = db
+
+class Lazy_prs:
+    def __init__(self, db):
+        self.db = db
+
 class Lazy_table:
     def __init__(self, head, lines, default):
         self.head = head
@@ -50,13 +58,13 @@ class Lazy_entity:
         self.details=details
         self.interfaces=interfaces
 
-class Relation:
+class Lazy_relation:
     def __init__(self, x, y, typename='association'):
         self.x = x
         self.y = y
         self.typename = typename
 
-class Message:
+class Lazy_message:
     @staticmethod
     def valid_types():
         return { 
@@ -98,10 +106,10 @@ def parse_sequence_message(msg):
     stop_if(not isinstance(msg, dict), Load_error, 'sequence.message must be a dict: ', msg)
     stop_if(len(msg.items()) != 1, Load_error, 'only one message per line allowed: ', msg)
     rel, text = list(msg.items())[0]
-    for r in Message.valid_types().keys():
+    for r in Lazy_message.valid_types().keys():
         res = rel.split(r)
         if len(r) == 2:
-            return Message(x=res[0].strip(), y=res[1].strip(), typeid=r, text=text)
+            return Lazy_message(x=res[0].strip(), y=res[1].strip(), typeid=r, text=text)
     stop_if(True, Load_error, 'sequence.message is strange: ', msg)
 
 def load_puml(path, pumlfile):
@@ -166,7 +174,7 @@ def load_swarc(filepath, filename):
     Loader.add_constructor('!trace', 
         lambda loader, x: load_trace(loader.construct_sequence(x)))
     with open(src) as f:
-        return yaml.load(f, Loader=Loader)
+        return Lazy_swarc(yaml.load(f, Loader=Loader))
 
 def load_prs(filepath, filename):
     src = os.path.join(filepath, filename)
@@ -176,7 +184,7 @@ def load_prs(filepath, filename):
     Loader.add_constructor('!include',
         lambda loader, x: load(filepath, loader.construct_scalar(x)))
     with open(src) as f:
-        return yaml.load(f, Loader=Loader)
+        return Lazy_prs(yaml.load(f, Loader=Loader))
 
 def load(filepath, filename):
     src = os.path.join(filepath, filename)
@@ -193,17 +201,110 @@ def load(filepath, filename):
         return yaml.load(f, Loader=Loader)
 
 # ----------------------------------------------------------------------
+
+Table = Lazy_table
+
+# dict like 
+class Mapping(dict):
+    def __init__(self, db):
+        assert isinstance(db, dict)
+        self.__dict__.__init__(db)
+    def __getitem__(self, key):
+        return self.__dict__[key]
+    def __len__(self):
+        return len(self.__dict__)
+    def __contains__(self, item):
+        return item in self.__dict__
+    def __iter__(self):
+        return iter(self.__dict__)
+    def keys(self):
+        return self.__dict__.keys()
+    def values(self):
+        return self.__dict__.values()
+    def items(self):
+        return self.__dict__.items()
+    def __str__(self):
+        return str(self.__dict__)
+    
+class DataTable:
+    def __init__(self, data=dict()):
+        assert isinstance(data, dict)
+        self.data = data
+        self.maps = {'name', Mapping(self.data)}
+
+    def __setitem__(self, key, item):
+        self.data[key] = item
+    def __getitem__(self, key):
+        return self.data[key]
+    def __len__(self):
+        return len(self.data)
+
+    def map_by(attribute_name):
+        if attribute_name not in self.maps:
+            db = {}
+            for v in self.data.values():
+                if attribute_name in v:
+                    db[attribute_name].append(v)
+                else:
+                    db[attribute_name] = [v]
+            self.maps[attribute_name] = db
+        return maps[attribute_name]
+
+
 class Objects:
     def __init__(self):
-        self.
+        self.db = {}
+
+    def get_table(name):
+        if name not is self.db:
+            self.db[name] = DataTable
+
+    def define(self, class_name, name, obj):
+        tbl = self.get_table(class_name)
+
+        if name in 
+
 
 
 def compile_objects(data):
-    def parser(obj, tree):
-
 
     obj = Objects()
-    parser(obj, data)
+
+    def parse(parent, node_name, node):
+        if node is None:
+            return
+        if isinstance(node, dict):
+            for name, subnode in node.items():
+                parse(name, subnode)
+            return
+        if isinstance(node, list):
+            for i, subnode in enumerate(node):
+                parse(i, subnode)
+            return
+        if isinstance(node, Lazy_swarc):
+            return parse(node_name, node.db)
+        if isinstance(node, Lazy_prs):
+            return parse(node_name, node.db)
+        if isinstance(node, Lazy_table):
+            return
+        if isinstance(node, Lazy_trace):
+            return
+        if isinstance(node, Lazy_sequence):
+
+            return
+        if isinstance(node, Lazy_entity):
+            obj.define('sw-entity-'+node.typename, node_name, Entity(node))
+            return parse(node_name, node.details)
+        if isinstance(node, Lazy_relation):
+            obj.define('sw-relation-'+node.typename, node_name, Relation(node))
+            return
+        if isinstance(node, Lazy_message):
+            obj.define('sw-message-'+node.typename, node_name, Message(node))
+            return 
+
+
+    root = obj.define('root', 'root', 'root')
+    parse(root, data)
     return obj
 
 @monadic
