@@ -257,13 +257,13 @@ class Objects:
 
     def get_table(name):
         if name not is self.db:
-            self.db[name] = DataTable
+            self.db[name] = DataTable()
+        return self.db[name]
 
     def define(self, class_name, name, obj):
         tbl = self.get_table(class_name)
-
-        if name in 
-
+        tbl[name] = obj
+        return obj
 
 
 def compile_objects(data):
@@ -306,6 +306,12 @@ def compile_objects(data):
     root = obj.define('root', 'root', 'root')
     parse(root, data)
     return obj
+
+# ------------------------------------------------------------------------
+#  linker
+
+def link(obj):
+    
 
 @monadic
 def do_all():
