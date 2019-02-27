@@ -17,6 +17,7 @@ def main():
         parser_entropy  = subparsers.add_parser('entropy',  help='estimate entropy')
         parser_import   = subparsers.add_parser('import',   help='import various formats')
         parser_generate = subparsers.add_parser('alpha-generate',  help='generate document by template')
+        parser_generate2 = subparsers.add_parser('alpha-generate2',  help='generate document by template')
 
         # judge    
         parser_judge.add_argument('project', type=str, help='project path')
@@ -53,6 +54,10 @@ def main():
         parser_generate.add_argument('project', type=str, help='project')
         parser_generate.add_argument('template', type=str, help='template')
         parser_generate.set_defaults(func=generate_handler)
+
+        # generate2
+        parser_generate2.add_argument('project', type=str, help='project')
+        parser_generate2.set_defaults(func=generate_handler2)
 
         # parse some argument lists
         args = parser.parse_args()
@@ -138,3 +143,20 @@ def generate_handler(args):
         outfile = os.path.splitext(filename)[0] + '.' + os.path.splitext(templatefile)[0]
         chaos.render_prs(prs, template, outfile)
 
+def generate_handler2(args):
+    log.debug('loading project: {}'.format(args.project))
+
+    from cast import poise
+
+    try:
+        filepath, filename = split_path(args.project)
+        # templatepath, templatefile = split_path(args.template)
+        # template = os.path.join(templatepath, templatefile)
+
+        prs = poise.load(filename, filepath)
+        # with dirutil.work_safe_mkdir(filepath + '-products'):
+        #     outfile = os.path.splitext(filename)[0] + '.' + os.path.splitext(templatefile)[0]
+        #     # poise.render_prs(prs, template, outfile)
+
+    except poise.PoiseError as e:
+        print(e)

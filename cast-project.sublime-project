@@ -41,6 +41,14 @@
                 },
 
                 {
+                    "name": "cast alpha-generate-2",
+                    "cmd": ["python", "cast-debug.py", "alpha-generate2", "prop-test/root.yml"],
+                    "file_regex": "(.*):(\\d+):(\\d*): error: (.*)",
+                    // "file_regex": "File \"([^<][^\"]+)\", line (\\d+)\\s*.*",
+
+                },
+
+                {
                     "name": "install",
                     "cmd": ["python", "setup.py", "install"],
                 },

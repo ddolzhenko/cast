@@ -11,20 +11,39 @@ ext = '.yml'
 # helpers
 def get_not_none(db, key, expected_type):
     x = db.get(key)
-    x = expected_type() if key is None else key
+    x = expected_type() if x is None else x
     return expected_type(x)
 
-get_str     = lambda db, key: get_not_none(db, x, str)
-get_list    = lambda db, key: get_not_none(db, x, list)
-get_dict    = lambda db, key: get_not_none(db, x, dict)
+get_str     = lambda db, key: get_not_none(db, key, str)
+get_list    = lambda db, key: get_not_none(db, key, list)
+get_dict    = lambda db, key: get_not_none(db, key, dict)
+
+not_list    = lambda x: not isinstance(x, list)
+not_dict    = lambda x: not isinstance(x, dict)
 
 # -----------------------------------------------------------------
 
-class Load_error(Exception): pass
+class PoiseError(Exception):
+    def __init__(self, mark, message):
+        self.message = message
+        self.mark = mark
 
-def stop_if(cond, error_class, *params):
+    def __str__(self):
+        err = '{}:{}:{}: error: {}'.format(
+            str(self.mark.name), 
+            self.mark.line, 
+            self.mark.column, 
+            str(self.message))
+        return err
+
+class ShortCirquit(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def stop_if(cond, msg):
     if cond:
-        raise error_class('Stop error: {}'.format(''.join(params)))
+        raise ShortCirquit(msg)
+
 
 class Lazy_swarc:
     def __init__(self, db):
@@ -41,17 +60,17 @@ class Lazy_table:
         self.default = default
 
 class Lazy_trace:
-    def __init__(self, ids=[]):
+    def __init__(self, ids):
         self.ids = ids
 
 class Lazy_sequence:
-    def __init__(self, brief='', relations=[]):
+    def __init__(self, brief, flow):
         self.brief = brief
-        self.relations = realtions
+        self.flow = flow
         self.puml = None
 
 class Lazy_entity:
-    def __init__(self, typename, brief, description, details, interfaces)
+    def __init__(self, typename, brief, description, details, interfaces):
         self.typename=typename
         self.brief=brief
         self.description=description
@@ -59,7 +78,7 @@ class Lazy_entity:
         self.interfaces=interfaces
 
 class Lazy_relation:
-    def __init__(self, x, y, typename='association'):
+    def __init__(self, x, y, typename):
         self.x = x
         self.y = y
         self.typename = typename
@@ -74,27 +93,25 @@ class Lazy_message:
             '<--', 'left-dotted',
             }
 
-    def __init__(self, x, y, typeid='->', text=''):
+    def __init__(self, x, y, typeid, text):
         self.x, self.y = x, y
         self.typeid = typeid
 
 
+
 def load_table(t):
-    assert isinstance(t, dict), 
-    default = get_str('default')
+    default = get_str(t, 'default')
     head    = get_list(t, 'head')
     lines   = get_list(t, 'lines')
     for line in lines:
-        stop_if(not_list(line), Load_error, 'table.lines must be a list of dicts')
-
+        stop_if(not_dict(line), 'table.lines must be a list of dicts: {}'.format(t))
     return Lazy_table(head, lines, default)
 
 def load_trace(t):
     return Lazy_trace([str(x) for x in t])
 
-
 def parse_relation(relation):
-    stop_if(not isinstance(relation, dict), Load_error, 'relation must be a dict', realation)
+    pass
     # <|-- extension
     # *-- composition
     # o-- aggregation
@@ -103,27 +120,26 @@ def parse_relation(relation):
     # -- dirrection
 
 def parse_sequence_message(msg):
-    stop_if(not isinstance(msg, dict), Load_error, 'sequence.message must be a dict: ', msg)
-    stop_if(len(msg.items()) != 1, Load_error, 'only one message per line allowed: ', msg)
+    stop_if(len(msg.items()) != 1, 'only one message per line allowed')
     rel, text = list(msg.items())[0]
     for r in Lazy_message.valid_types().keys():
         res = rel.split(r)
         if len(r) == 2:
             return Lazy_message(x=res[0].strip(), y=res[1].strip(), typeid=r, text=text)
-    stop_if(True, Load_error, 'sequence.message is strange: ', msg)
+    stop_if(True, 'sequence.message is strange')
 
-def load_puml(path, pumlfile):
-    res = Lazy_sequence()
+def load_puml(pumlfile, path):
+    res = Lazy_sequence(brief='', flow=[])
     res.pumlfile = os.path.join(path, pumlfile)
     return res
 
 def load_sequence(db):
-    assert isinstance(db, dict)
     brief = get_str(db, 'brief')
     flow = list(map(parse_sequence_message, get_list(db, 'flow')))
     return Lazy_sequence(brief=brief, flow=flow)
 
 def load_entity(entity, typename):
+    entity = dict() if entity is None else entity
     brief       = get_str(entity, 'brief')
     desc        = get_str(entity, 'description')
     details     = get_dict(entity, 'details')
@@ -135,74 +151,76 @@ def load_entity(entity, typename):
                         interfaces=interfaces)
 
 def load_entities(entity, typename):
-    assert isinstance(entity, dict)
-    return {name: load_enity(value, typename) for name, value in entity.items()}
+    return Lazy_swarc({name: load_entity(value, typename) for name, value in entity.items()})
 
-def load_swarc(filepath, filename):
+def loader_bind(expected_type, loader_handler, *params):
+    def wrapper(loader, node):
+        mark = node.end_mark
+        if expected_type == dict:
+            db = loader.construct_mapping(node)
+        elif expected_type == list:
+            db = loader.construct_sequence(node)
+        else:
+            db = loader.construct_scalar(node)
+        db = expected_type() if db is None else expected_type(db)
+        try:
+            # print('calling: ', loader_handler.__name__)
+            # print('db: ', db)
+            # print('params: ', params)
+            result = loader_handler(db, *params)
+            result.mark = mark
+        except ShortCirquit as e:
+            raise PoiseError(mark, e.msg)
+        except Exception as e:
+            # raise e
+            raise e if isinstance(e, PoiseError) else PoiseError(mark, str(e))
+        return result
+    return wrapper
+
+def fix_path(filename, filepath):
     src = os.path.join(filepath, filename)
-    log.verbose('loading swarc: ' + src)
+    src = os.path.abspath(src)
+    filepath, filename = os.path.split(src)
+    return filename, filepath
     
-    class Loader(yaml.Loader): pass
-    Loader.add_constructor('!include/swarc',
-        lambda loader, x: load_swarc(filepath, loader.construct_scalar(x)))
-    Loader.add_constructor('!include/puml',
-        lambda loader, x: load_puml(filepath, loader.construct_scalar(x)))
-    
-    Loader.add_constructor('!unit',
-        lambda loader, x: load_entity(loader.construct_mapping(x), 'unit'))
-    Loader.add_constructor('!units',
-        lambda loader, x: load_entities(loader.construct_mapping(x), 'unit'))
-    Loader.add_constructor('!component',
-        lambda loader, x: load_entity(loader.construct_mapping(x), 'component'))
-    Loader.add_constructor('!components',
-        lambda loader, x: load_entities(loader.construct_mapping(x), 'component'))
-    Loader.add_constructor('!domain',
-        lambda loader, x: load_entity(loader.construct_mapping(x), 'domain'))
-    Loader.add_constructor('!domains',
-        lambda loader, x: load_entities(loader.construct_mapping(x), 'domain'))
 
-    Loader.add_constructor('!node',
-        lambda loader, x: load_entity(loader.construct_mapping(x), 'node'))
-    Loader.add_constructor('!nodes',
-        lambda loader, x: load_entities(loader.construct_mapping(x), 'node'))
-    
-    Loader.add_constructor('!sequence', 
-        lambda loader, x: load_sequence(loader.construct_mapping(x)))
-    
-    Loader.add_constructor('!table', 
-        lambda loader, x: load_table(loader.construct_mapping(x)))
-    Loader.add_constructor('!trace', 
-        lambda loader, x: load_trace(loader.construct_sequence(x)))
-    with open(src) as f:
-        return Lazy_swarc(yaml.load(f, Loader=Loader))
+def load_swarc(filename, filepath):
+    filename, filepath = fix_path(filename, filepath)
+    class Loader(yaml.Loader): pass
+    Loader.add_constructor('!include/swarc',    loader_bind(str,  load_swarc, filepath))
+    Loader.add_constructor('!include/puml',     loader_bind(str,  load_puml, filepath))
+    Loader.add_constructor('!nodes',            loader_bind(dict, load_entities, 'node'))
+    Loader.add_constructor('!units',            loader_bind(dict, load_entities, 'unit'))
+    Loader.add_constructor('!components',       loader_bind(dict, load_entities, 'component'))
+    Loader.add_constructor('!domains',          loader_bind(dict, load_entities, 'domain'))
+    Loader.add_constructor('!sequence',         loader_bind(dict, load_sequence))
+    Loader.add_constructor('!table',            loader_bind(dict, load_table))
+    Loader.add_constructor('!trace',            loader_bind(list, load_trace))
+    try:
+        with open(os.path.join(filepath, filename)) as f:
+            return Lazy_swarc(yaml.load(f, Loader=Loader))
+    except FileNotFoundError as e:
+        raise ShortCirquit(str(e))
+
 
 def load_prs(filepath, filename):
-    src = os.path.join(filepath, filename)
-    log.verbose('loading prs: ' + src)
-
+    filename, filepath = fix_path(filename, filepath)
+    raise Exception('TODO')
+    
+def load(filename, filepath):
+    filename, filepath = fix_path(filename, filepath)
     class Loader(yaml.Loader): pass
-    Loader.add_constructor('!include',
-        lambda loader, x: load(filepath, loader.construct_scalar(x)))
-    with open(src) as f:
-        return Lazy_prs(yaml.load(f, Loader=Loader))
-
-def load(filepath, filename):
-    src = os.path.join(filepath, filename)
-    log.verbose('loading: ' + src)
-   
-    class Loader(yaml.Loader): pass
-    Loader.add_constructor('!include/swarc',
-        lambda loader, x: load_swarc(filepath, loader.construct_scalar(x)))
-    Loader.add_constructor('!include/prs',
-        lambda loader, x: load_prs(filepath, loader.construct_scalar(x)))
-    Loader.add_constructor('!include',
-        lambda loader, x: load(filepath, loader.construct_scalar(x)))
-    with open(src) as f:
-        return yaml.load(f, Loader=Loader)
-
+    Loader.add_constructor('!include/swarc',    loader_bind(str, load_swarc, filepath))
+    Loader.add_constructor('!include/prs',      loader_bind(str, load_prs, filepath))
+    Loader.add_constructor('!include',          loader_bind(str, load, filepath))
+    try:
+        with open(os.path.join(filepath, filename)) as f:
+            return yaml.load(f, Loader=Loader)
+    except yaml.scanner.ScannerError as e:
+        raise PoiseError(e.problem_mark, e.problem)
+    
+        
 # ----------------------------------------------------------------------
-
-Table = Lazy_table
 
 # dict like 
 class Mapping(dict):
@@ -239,6 +257,9 @@ class DataTable:
     def __len__(self):
         return len(self.data)
 
+    def items(self):
+        return self.maps['name']
+
     def map_by(attribute_name):
         if attribute_name not in self.maps:
             db = {}
@@ -256,7 +277,7 @@ class Objects:
         self.db = {}
 
     def get_table(name):
-        if name not is self.db:
+        if name not in self.db:
             self.db[name] = DataTable()
         return self.db[name]
 
@@ -264,6 +285,34 @@ class Objects:
         tbl = self.get_table(class_name)
         tbl[name] = obj
         return obj
+
+class Entity:
+
+    def __init__(self):
+        self.type_name
+        self.name
+        self.brief
+        self.description
+
+        # self.parents    {who, what kind}
+        # self.children   {who, }
+
+        # self.interfaces {}
+
+        # self.dependencies_on_me {who, how}
+        # self.dependencies_me_on {who, how}
+
+
+class Relation:
+    def __init__(self, data):
+        ...
+        
+        self.x
+        self.y
+        self.relation_type
+        self.relation_dirrection
+    
+    
 
 
 def compile_objects(data):
@@ -293,13 +342,13 @@ def compile_objects(data):
 
             return
         if isinstance(node, Lazy_entity):
-            obj.define('sw-entity-'+node.typename, node_name, Entity(node))
+            obj.define('entities', node_name, Entity(node))
             return parse(node_name, node.details)
         if isinstance(node, Lazy_relation):
-            obj.define('sw-relation-'+node.typename, node_name, Relation(node))
+            obj.define('relations', node_name, Relation(node))
             return
         if isinstance(node, Lazy_message):
-            obj.define('sw-message-'+node.typename, node_name, Message(node))
+            obj.define('relations', node_name, Relation(node))
             return 
 
 
@@ -311,9 +360,16 @@ def compile_objects(data):
 #  linker
 
 def link(obj):
-    
+    entities  = obj.get_table('entities').map_by('name')
+    relations = obj.get_table('relations').map_by('name')
 
-@monadic
+    for name, r in relations.values():
+        pass        
+
+
+
+
+# @monadic
 def do_all():
     data = load(filepath, filename)
     obj = compile_objects(data)
