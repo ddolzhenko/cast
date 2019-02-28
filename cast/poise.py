@@ -134,6 +134,8 @@ def load_puml(pumlfile, path):
     return res
 
 def load_sequence(db):
+    # TODO
+    return Lazy_sequence(brief='', flow=[])
     brief = get_str(db, 'brief')
     flow = list(map(parse_sequence_message, get_list(db, 'flow')))
     return Lazy_sequence(brief=brief, flow=flow)
@@ -315,7 +317,7 @@ class Relation:
     
 
 
-def compile_objects(data):
+def compile(data):
 
     obj = Objects()
 
@@ -360,6 +362,7 @@ def compile_objects(data):
 #  linker
 
 def link(obj):
+    # add link information to each object
     entities  = obj.get_table('entities').map_by('name')
     relations = obj.get_table('relations').map_by('name')
 
@@ -368,18 +371,18 @@ def link(obj):
 
 
 
+def render(lib, templatefile, outfile):
+    for target in lib.targets():
+        with open(target.templatefile) as f:
+            template = jinja2.Template(f.read())
+        with open(target.outfile, 'w') as f:
+            f.write(template.render(entity=target.entity))
 
 # @monadic
-def do_all():
-    data = load(filepath, filename)
-    obj = compile_objects(data)
+def do_all(filepath, filename):
+    data = load(filename, filepath)
+    obj = compile(data)
     lib = link(obj)
-    return lib
+    return render(lib)
 
-
-def render_prs(prs, templatefile, outfile):
-    with open(templatefile) as f:
-        template = jinja2.Template(f.read())
-    with open(outfile, 'w') as f:
-        f.write(template.render(prs=prs))
 

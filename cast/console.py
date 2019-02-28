@@ -153,7 +153,7 @@ def generate_handler2(args):
         # templatepath, templatefile = split_path(args.template)
         # template = os.path.join(templatepath, templatefile)
 
-        prs = poise.load(filename, filepath)
+        prs = poise.do_all(filepath, filename)
         # with dirutil.work_safe_mkdir(filepath + '-products'):
         #     outfile = os.path.splitext(filename)[0] + '.' + os.path.splitext(templatefile)[0]
         #     # poise.render_prs(prs, template, outfile)
